@@ -2,13 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="./icons/48.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <title>GET Tools</title>
-    <script type="module" crossorigin src="./assets/index-RnRsab3L.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Dk1yzUj2.css">
+    <meta property="og:title" content="GET Tools">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://cabalex.github.io/get-tools/icons/512.png" >
+    <meta property="og:description" content="View campus spending, scan in-store, and share with friends">
+    <link rel="manifest" href="manifest.json" />
+    <script type="module" crossorigin src="./assets/index-DbUucZDR.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Dd4X_HON.css">
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('serviceWorker.js').then(registration => {
+            console.log('SW registered: ', registration);
+          }).catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

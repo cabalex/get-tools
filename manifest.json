@@ -1,0 +1,21 @@
+{
+    "name": "GET Tools",
+    "short_name": "GET Tools",
+    "start_url": "./",
+    "scope": ".",
+    "display": "standalone",
+    "icons": [
+      {
+        "src": "icons/192.png",
+        "type": "image/png",
+        "purpose": "any maskable",
+        "sizes": "192x192"
+      },
+      {
+        "src": "icons/92.png",
+        "type": "image/png",
+        "sizes": "92x92"
+      }
+    ]
+  }
+  
