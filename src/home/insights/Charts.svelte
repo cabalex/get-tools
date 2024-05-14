@@ -70,6 +70,7 @@
     }
     :global(.chart) {
         width: 100%;
+        min-height: 300px;
         flex-shrink: 1;
         display: flex;
         overflow: hidden;

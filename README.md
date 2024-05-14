@@ -4,6 +4,8 @@ Tools for interacting with CBORD's GET app, featuring:
 - QR code generation
 - Code sharing
 
+This app is not affiliated with CBORD or GET. It's just a passion project for fun!
+
 ## Security
 Since CBORD's API is exposed with CORS headers, the app works by directly sending requests to the GET API. No information is ever sent to a third party server.
 

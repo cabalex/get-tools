@@ -26,7 +26,7 @@
         width: calc(100% - 40px);
         padding: 20px;
         padding-top: 100px;
-        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), #242424), url(banner.jpg), var(--primary);
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), #242424), url(./banner.jpg), var(--primary);
         background-size: cover;
         background-position-y: 40%;
     }

@@ -62,12 +62,14 @@
     .scan {
         position: fixed;
         width: 400px;
-        top: calc(100% - 50px);
+        bottom: -240px;
+        bottom: calc(env(safe-area-inset-bottom) - 240px);
         right: 5%;
-        transition: top 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
+        transition: bottom 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
     }
     .scan.open {
-        top: calc(100% - 190px);
+        bottom: 0px;
+        bottom: calc(env(safe-area-inset-bottom));
     }
     .barcode {
         height: 80px;
@@ -112,13 +114,16 @@
             width: calc(100% - 20px);
             left: 10px;
             right: 10px;
+            bottom: -227px;
+            bottom: calc(env(safe-area-inset-bottom) - 227px);
         }
         .scan.open {
-            top: calc(80% - 10px);
+            bottom: 60px;
+            bottom: calc(env(safe-area-inset-bottom) + 60px);
             height: 20%;
         }
         .barcode {
-            height: calc(100% - 100px);
+            height: calc(100% - 50px);
             justify-content: flex-start;
         }
         .barcode canvas {
