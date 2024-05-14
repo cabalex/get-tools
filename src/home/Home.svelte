@@ -1,10 +1,11 @@
 <script lang="ts">
-    import { makeGETRequest, sharedDevices } from "../getStore";
+    import { makeGETRequest, sharedDevices, logout } from "../getStore";
     import { IconExclamationCircle } from "@tabler/icons-svelte";
     import Header from "./header/Header.svelte";
     import Insights from "./insights/Insights.svelte";
     import Scan from "./scan/Scan.svelte";
     import type { Account, Transaction } from "../types";
+  import Skeleton from "../assets/Skeleton.svelte";
 
     async function loadAccounts(): Promise<Account[]> {
         let { response } = await makeGETRequest("commerce", "retrieveAccounts");
@@ -70,16 +71,25 @@
     </div>
 {/if}
 {#await loadAccounts()}
-    Loading...
+    <Skeleton height={300} />
 {:then accounts}
     <Header accounts={accounts} />
 {:catch error}
     <p>{error.message}</p>
 {/await}
 {#await loadTransactions()}
-    Loading...
+    <Skeleton height={500} />
 {:then transactions}
     <Insights transactions={transactions} />
+    <div class="logout">
+        <button
+            class="dangerBtn logoutBtn"
+            disabled={$sharedDevices && $sharedDevices.length}
+            on:click={logout}
+        >
+            {$sharedDevices && $sharedDevices.length ? "Revoke all codes before logging out" : "Logout"}
+        </button>
+    </div>
 {:catch error}
     <p>{error.message}</p>
 {/await}
@@ -109,5 +119,18 @@
     }
     .shareWarning span {
         font-size: 0.8em;
+    }
+    .logout {
+        background-color: #111;
+        margin: 0 auto;
+        padding: 20px;
+        padding-bottom: 100px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .logoutBtn {
+        padding: 10px 40px;
     }
 </style>

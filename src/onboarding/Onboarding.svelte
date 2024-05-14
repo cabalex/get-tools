@@ -48,7 +48,7 @@
         <p><b>GET</b>ting your data...</p>
         <Loading />
     {:else}
-        <h2>Welcome to GET tools!</h2>
+        <h2>Welcome to GET Tools!</h2>
         <p>To get started, we'll need access to your GET account.</p>
         <p>Open this link and sign in with your UCSC account.</p>
         <a class="btn" href="https://get.cbord.com/ucsc/full/login.php?mobileapp=1" target="_blank" rel="noopener noreferrer">
@@ -62,7 +62,9 @@
                 <span style="color: red;">Hmm... this doesn't seem like a valid link. Try again?</span>
             {/if}
         </div>
-        <span class="small">Your login data is not sent to any server and remains on device.</span>
+        <span class="small">
+            Your login data is only sent to GET and remains on device.<br /><a target="_blank" rel="noopener noreferrer" href="https://github.com/cabalex/get-tools?tab=readme-ov-file#security">See how we process your data</a>
+        </span>
     {/if}
 </div>
 
@@ -78,6 +80,8 @@
         align-items: center;
         gap: 10px;
         max-width: 500px;
+        margin: 20px auto;
+        text-align: center;
     }
     .linkInput {
         background-color: #222;

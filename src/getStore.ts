@@ -79,6 +79,30 @@ async function getToken() {
 }
 getToken();
 
+export async function logout() {
+    if (!localStorage.getItem("get-data")) return;
+
+    let { pin, deviceId } = JSON.parse(localStorage.getItem("get-data") || "{}");
+
+    if (!pin || !deviceId){
+        console.error("No pin or deviceId found in local storage.");
+        localStorage.removeItem("get-data");
+        return;
+    }
+
+    let response = await makeGETRequest("user", "deletePIN", {
+        deviceId
+    });
+
+    if (response.response === true) {
+        localStorage.removeItem("get-data");
+        localStorage.removeItem("shared-devices");
+        window.location.reload();
+    } else {
+        alert("Couldn't log out.");
+    }
+}
+
 /**
  * Verify if shared devices were revoked on the other end.
  */
