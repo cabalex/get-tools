@@ -1,10 +1,14 @@
 import { writable, get } from "svelte/store";
+import type { Account, Transaction } from "./types";
 
 const ENDPOINT = "https://services.get.cbord.com/GETServices/services/json";
 
 const sessionId = writable<null|string>(null);
 export const sharedDevices = writable<Array<{deviceId: string, pin: string}>>(
     JSON.parse(localStorage.getItem("shared-devices") || "[]")
+);
+export const revokeOptions = writable<null|{condition: "balance"|"transactions", value: number, startTime: number}>(
+    JSON.parse(localStorage.getItem("revoke-options") || "null")
 );
 
 export function addSharedDevice(deviceId: string, pin: string) {
@@ -107,6 +111,43 @@ export async function logout() {
  * Verify if shared devices were revoked on the other end.
  */
 async function verifySharedSessions() {
+    let options = get(revokeOptions);
+    // check state of conditional revocation
+    if (options !== null) {
+        switch(options.condition) {
+            case "balance": {
+                let { response } = await makeGETRequest("commerce", "retrieveAccounts");
+                let accounts: Account[] = response.accounts;
+                if (accounts.reduce((acc: number, account: Account) => acc + (account.balance || 0), 0) < options.value) {
+                    revokeAllCodes();
+                    revokeOptions.set(null);
+                    localStorage.removeItem("revoke-options");
+                }
+                break;
+            }
+            case "transactions": {
+                let { response } = await makeGETRequest("commerce", "retrieveTransactionHistoryWithinDateRange", {
+                    "paymentSystemType": 0,
+                    "queryCriteria": {
+                        "maxReturnMostRecent": 1000,
+                        "newestDate": null,
+                        "oldestDate": new Date(options.startTime).toISOString(),
+                        "accountId": null
+                    }
+                });
+
+                // sometimes the API can return completely irrelevant transactions, so sanity check
+                if (response.transactions.filter((x: Transaction) => new Date(x.actualDate).getTime() > options.startTime).length >= options.value) {
+                    revokeAllCodes();
+                    revokeOptions.set(null);
+                    localStorage.removeItem("revoke-options");
+                }
+                break;
+            }
+        }
+    }
+
+
     let devices = get(sharedDevices) || [];
     for (let device of devices) {
         let response = await makeGETRequest("authentication", "authenticatePIN", {
@@ -122,6 +163,22 @@ async function verifySharedSessions() {
         if (response.exception) {
             removeSharedDevice(device.deviceId, device.pin);
         }
+    }
+}
+
+export async function revokeSharedDevice(deviceId: string, pin: string) {
+    let response = await makeGETRequest("user", "deletePIN", {
+        deviceId
+    });
+
+    if (response.response === true) {
+        removeSharedDevice(deviceId, pin);
+    }
+}
+
+async function revokeAllCodes() {
+    for (let sharedDevice of get(sharedDevices)) {
+        await revokeSharedDevice(sharedDevice.deviceId, sharedDevice.pin);
     }
 }
 

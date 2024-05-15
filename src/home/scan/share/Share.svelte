@@ -2,8 +2,9 @@
     import { IconExclamationCircle, IconCirclePlus, IconDeviceMobile, IconTrash, IconCopy } from "@tabler/icons-svelte";
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
-    import { addSharedDevice, makeGETRequest, removeSharedDevice, sharedDevices } from "../../../getStore";
+    import { addSharedDevice, makeGETRequest, revokeSharedDevice, sharedDevices } from "../../../getStore";
     import Loading from "../../../assets/Loading.svelte";
+    import RevokeOptions from "./RevokeOptions.svelte";
 
     const dispatcher = createEventDispatcher();
     let loading = false;
@@ -12,7 +13,7 @@
         loading = true;
 
         let deviceId = Math.round(Math.random() * 100_000_000_000_000_000).toString(16).padStart(16, "9");
-        let pin = Math.floor(Math.random() * 1000).toString().padStart(4, "0");
+        let pin = Math.floor(Math.random() * 9999).toString().padStart(4, "0");
 
 
         let response = await makeGETRequest("user", "createPIN", {
@@ -24,19 +25,6 @@
             addSharedDevice(deviceId, pin);
         }
         loading = false;
-    }
-
-    async function revokeSharedDevice(deviceId: string, pin: string) {
-        let response = await makeGETRequest("user", "deletePIN", {
-            deviceId
-        });
-
-        if (response.response === true) {
-            removeSharedDevice(deviceId, pin);
-            loading = false;
-        } else {
-            loading = false;
-        }
     }
 
     let revokingAll = false;
@@ -63,6 +51,7 @@
             <span>Creating temporary codes allows other people access to your GET account.<br /> Only share this link with people you trust!</span>
         </div>
         {#if $sharedDevices && $sharedDevices.length > 0}
+            <RevokeOptions />
             <div style="margin: 10px 0; display: flex; justify-content: flex-end">
                 <button class="dangerBtn" disabled={revokingAll} on:click={revokeAllCodes}>
                     {revokingAll ? "Revoking..." : "Revoke all codes"}
@@ -74,7 +63,7 @@
             <IconDeviceMobile />
             <div class="text">
                 <h3>Shared code</h3>
-                <p class="small">{sharedDevice.deviceId} - {sharedDevice.pin}</p>
+                <p class="small">{sharedDevice.deviceId} • {sharedDevice.pin}</p>
             </div>
             <button on:click={copyLink.bind(null, sharedDevice.deviceId, sharedDevice.pin)}>
                 <IconCopy />
@@ -134,6 +123,7 @@
         gap: 10px;
         align-items: center;
         text-align: left;
+        margin-bottom: 10px;
     }
     h2 {
         margin: 10px 0;
@@ -159,6 +149,9 @@
     }
     .sharedDevice .text > * {
         margin: 0;
+    }
+    .sharedDevice .small {
+        font-family: monospace;
     }
     @media screen and (max-width: 550px) {
         button span {
