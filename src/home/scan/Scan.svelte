@@ -1,17 +1,21 @@
 <script lang="ts">
-    import { IconScan, IconChevronUp, IconChevronDown, IconShare } from "@tabler/icons-svelte";
+    import { IconScan, IconChevronUp, IconChevronDown, IconShare, IconArrowsMaximize } from "@tabler/icons-svelte";
     import { makeGETRequest } from "../../getStore";
     import { onDestroy, onMount } from "svelte";
     import Share from "./share/Share.svelte";
+    import ScanFullscreen from "./ScanFullscreen.svelte";
     import * as PDF417 from "pdf417-generator";
 
     let tabOpen = false;
     let canvasElem: HTMLCanvasElement;
     let interval: number;
     export let shareModalOpen = false;
+    export let scanFullscreenOpen = false;
 
+    let code = "";
     async function generateCode() {
         let { response } = await makeGETRequest("authentication", "retrievePatronBarcodePayload");
+        code = response;
         PDF417.draw(response, canvasElem, 3);
     }
 
@@ -52,10 +56,16 @@
         <button on:click={() => shareModalOpen = true}>
             <IconShare /> Share Code
         </button>
+        <button on:click={() => scanFullscreenOpen = true}>
+            <IconArrowsMaximize /> Maximize
+        </button>
     </div>
 </div>
 {#if shareModalOpen}
     <Share on:close={() => shareModalOpen = false} />
+{/if}
+{#if scanFullscreenOpen}
+    <ScanFullscreen code={code} on:close={() => scanFullscreenOpen = false} />
 {/if}
 
 <style>

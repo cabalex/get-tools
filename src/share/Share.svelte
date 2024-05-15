@@ -1,14 +1,16 @@
 <script lang="ts">
-    import { IconBarcode, IconBarcodeOff } from "@tabler/icons-svelte";
+    import { IconBarcode, IconBarcodeOff, IconCheck, IconUser, IconChevronLeft } from "@tabler/icons-svelte";
     import { makeGETRequest } from "../getStore";
     import { onDestroy, onMount } from "svelte";
     import * as PDF417 from "pdf417-generator";
+    import './ShareFullscreen.css';
     import Loading from "../assets/Loading.svelte";
 
     let canvasElem: HTMLCanvasElement;
     let interval: number;
     let invalid = false;
     let sessionId: string = "";
+    let lightTheme = false;
 
     let pin = "";
     let deviceId = "";
@@ -78,15 +80,37 @@
     onDestroy(() => {
         clearInterval(interval);
     });
-</script>
 
-<section class="shareClient">
+    $: {
+        if (lightTheme) {
+            document.body.classList.add("light");
+        } else {
+            document.body.classList.remove("light");
+        }
+    }
+</script>
+{#if lightTheme}
+<header class="shareOuterHeader">
+    <button on:click={() => lightTheme = false}><IconChevronLeft /> Back</button>
+    <h2>Scan Card</h2>
+</header>
+{/if}
+<section class="shareClient" class:light={lightTheme}>
     {#if !invalid}
         <div class="shareHeader">
+            {#if lightTheme}
+            <div style="flex-grow: 1; height: 100%" />
+            <IconUser size={128} />
+            <div style="flex-grow: 1; height: 100%" />
+            {:else}
             <IconBarcode size={256} />
             <h3>Scan below</h3>
             <p>For best results, increase your device's brightness before scanning</p>
+            <button class="lightMode" on:click={() => lightTheme = true}>
+                Switch theme
+            </button>
             <p class="credit">Shared via <a style="color: white" href="https://cabalex.github.io/get-tools">GET Tools</a></p>
+            {/if}
         </div>
         <div class="barcode">
             {#if !generated}
@@ -106,76 +130,3 @@
         </div>
     {/if}
 </section>
-
-<style>
-    .shareClient {
-        position: fixed;
-        width: calc(100% - 40px);
-        height: calc(100% - 40px);
-        height: calc(calc(100% - 40px) - env(safe-area-inset-bottom));
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        padding: 10px;
-        margin: 10px;
-        border-radius: 10px;
-        background-color: #444;
-    }
-    .shareHeader {
-        height: calc(100% - 40px);
-        background-color: #555;
-        border-radius: 10px;
-        padding: 40px;
-        display: flex;
-        text-align: center;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        position: relative;
-    }
-    h2 {
-        margin: 0;
-        line-height: 64px;
-        font-size: 48px;
-    }
-    h3 {
-        margin: 0;
-    }
-    .credit {
-        position: absolute;
-        bottom: 10px;
-        font-size: 0.9em;
-    }
-    .barcode {
-        border-radius: 10px;
-        padding: 10px 2%;
-        height: 150px;
-        background-color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-    }
-    .barcode canvas {
-        width: calc(100% - 40px);
-        max-width: 700px;
-        height: 100%;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-    }
-    .dangerBtn {
-        justify-content: center;
-        padding: 20px;
-        height: 10%;
-    }
-    .loading {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-    }
-    @media screen and (min-width: 700px) {
-        .barcode {
-            height: 150px;
-        }
-    }
-</style>
