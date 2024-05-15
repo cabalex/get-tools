@@ -27,6 +27,10 @@
         "Simp-GlobalVillage": "Global Village Cafe",
         "Simp-PerkEMS": "Perk Coffee Bar (Earth & Marine Sciences)",
         "Simp-PerkBaskin": "Perk Coffee Bar (Baskin Engineering)",
+        "Simp-PerkPSB": "Perk Coffee Bar (Physical Sciences Building)",
+        "Simp-Stevenson Coffee Shop": "Stevenson Coffee Shop",
+        "Simp-UnivCenter": "University Center",
+        "Simp-SlugStop": "Slug Stop",
         "Simp-Perk": "Perk Coffee Bar",
     }
     
@@ -53,8 +57,9 @@
                 // probably a faster way of doing this
                 response.transactions[i].friendlyName = response.transactions[i].locationName.slice(0, -2);
                 for (let key of Object.keys(friendlyNames)) {
-                    if (response.transactions[i].friendlyName === key) {
+                    if (response.transactions[i].friendlyName.startsWith(key)) {
                         response.transactions[i].friendlyName = friendlyNames[key as never];
+                        break;
                     }
                 }
             }
