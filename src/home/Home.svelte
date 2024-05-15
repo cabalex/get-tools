@@ -5,12 +5,14 @@
     import Insights from "./insights/Insights.svelte";
     import Scan from "./scan/Scan.svelte";
     import type { Account, Transaction } from "../types";
-  import Skeleton from "../assets/Skeleton.svelte";
+    import Skeleton from "../assets/Skeleton.svelte";
 
     async function loadAccounts(): Promise<Account[]> {
         let { response } = await makeGETRequest("commerce", "retrieveAccounts");
         return response.accounts;
     }
+
+    let shareModalOpen = false;
 
 
     const friendlyNames = {
@@ -65,9 +67,12 @@
     <div class="shareWarning">
         <IconExclamationCircle />
         <div class="text">
-            <b>Sharing codes with {$sharedDevices.length} {$sharedDevices.length === 1 ? "device" : "devices"}</b>
-            <span>See Scan &gt; Share Code for more details</span>
+            <b>Sharing {$sharedDevices.length} {$sharedDevices.length === 1 ? "code" : "codes"}</b>
+            <span>Other people can use your GET account to pay</span>
         </div>
+        <button on:click={() => shareModalOpen = true}>
+            View and disable
+        </button>
     </div>
 {/if}
 {#await loadAccounts()}
@@ -94,7 +99,7 @@
     <p>{error.message}</p>
 {/await}
 
-<Scan />
+<Scan bind:shareModalOpen={shareModalOpen} />
 
 <style>
     .shareWarning {
@@ -107,18 +112,30 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
+        width: calc(100% - 20px);
         z-index: 10;
     }
     .shareWarning .text {
         display: flex;
         flex-direction: column;
+        flex-grow: 1;
     }
     .shareWarning .text > * {
         margin: 0;
     }
     .shareWarning span {
         font-size: 0.8em;
+    }
+    .shareWarning button {
+        white-space: nowrap;
+        background-color: transparent;
+        border-color: black;
+        color: black;
+        transition: background-color 0.2s, color 0.2s;
+    }
+    .shareWarning button:hover {
+        background-color: black;
+        color: white;
     }
     .logout {
         background-color: #111;

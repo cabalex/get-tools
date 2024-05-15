@@ -6,9 +6,9 @@
     import * as PDF417 from "pdf417-generator";
 
     let tabOpen = false;
-    let shareOpen = false;
     let canvasElem: HTMLCanvasElement;
     let interval: number;
+    export let shareModalOpen = false;
 
     async function generateCode() {
         let { response } = await makeGETRequest("authentication", "retrievePatronBarcodePayload");
@@ -49,21 +49,21 @@
         <canvas bind:this={canvasElem} />
     </div>
     <div class="btnrow">
-        <button on:click={() => shareOpen = true}>
+        <button on:click={() => shareModalOpen = true}>
             <IconShare /> Share Code
         </button>
     </div>
 </div>
-{#if shareOpen}
-    <Share on:close={() => shareOpen = false} />
+{#if shareModalOpen}
+    <Share on:close={() => shareModalOpen = false} />
 {/if}
 
 <style>
     .scan {
         position: fixed;
         width: 400px;
-        bottom: -240px;
-        bottom: calc(env(safe-area-inset-bottom) - 240px);
+        bottom: 0px;
+        bottom: calc(env(safe-area-inset-bottom) - 140px);
         right: 5%;
         transition: bottom 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
     }
@@ -114,13 +114,13 @@
             width: calc(100% - 20px);
             left: 10px;
             right: 10px;
-            bottom: -227px;
-            bottom: calc(env(safe-area-inset-bottom) - 227px);
+            bottom: calc(-15% - 2px);
+            bottom: calc(calc(env(safe-area-inset-bottom) - 15%) - 2px);
+            height: 20%;
         }
         .scan.open {
             bottom: 60px;
             bottom: calc(env(safe-area-inset-bottom) + 60px);
-            height: 20%;
         }
         .barcode {
             height: calc(100% - 50px);

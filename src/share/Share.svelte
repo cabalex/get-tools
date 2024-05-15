@@ -3,6 +3,7 @@
     import { makeGETRequest } from "../getStore";
     import { onDestroy, onMount } from "svelte";
     import * as PDF417 from "pdf417-generator";
+    import Loading from "../assets/Loading.svelte";
 
     let canvasElem: HTMLCanvasElement;
     let interval: number;
@@ -60,11 +61,13 @@
         }
     }
 
+    let generated = false;
     async function generateCode() {
         if (await getSessionId() === false) return;
 
         let { response } = await makeGETRequest("authentication", "retrievePatronBarcodePayload", {sessionId}, false);
         PDF417.draw(response, canvasElem, 3);
+        generated = true;
     }
 
     onMount(async () => {
@@ -80,19 +83,26 @@
 <section class="shareClient">
     {#if !invalid}
         <div class="shareHeader">
-            <IconBarcode size={192} />
-            <h2>Shared code</h2>
+            <IconBarcode size={256} />
             <h3>Scan below</h3>
+            <p>For best results, increase your device's brightness before scanning</p>
+            <p class="credit">Shared via <a style="color: white" href="https://cabalex.github.io/get-tools">GET Tools</a></p>
         </div>
         <div class="barcode">
+            {#if !generated}
+                <div class="loading">
+                    <Loading />
+                </div>
+            {/if}
             <canvas bind:this={canvasElem} />
         </div>
         <button class="dangerBtn" on:click={revokeCode}>I'm done with this code</button>
     {:else}
         <div class="shareHeader">
-            <IconBarcodeOff size={192} />
+            <IconBarcodeOff size={256} />
             <h2>Code revoked</h2>
             <h3>Ask the account owner for a new one!</h3>
+            <p class="credit">Share your points with <a style="color: white" href="https://cabalex.github.io/get-tools">GET Tools</a></p>
         </div>
     {/if}
 </section>
@@ -102,6 +112,7 @@
         position: fixed;
         width: calc(100% - 40px);
         height: calc(100% - 40px);
+        height: calc(calc(100% - 40px) - env(safe-area-inset-bottom));
         display: flex;
         flex-direction: column;
         gap: 20px;
@@ -111,18 +122,29 @@
         background-color: #444;
     }
     .shareHeader {
-        height: 100%;
+        height: calc(100% - 40px);
         background-color: #555;
-        margin: 10px;
         border-radius: 10px;
+        padding: 40px;
         display: flex;
+        text-align: center;
         justify-content: center;
         align-items: center;
         flex-direction: column;
+        position: relative;
     }
     h2 {
         margin: 0;
-        font-size: 64px;
+        line-height: 64px;
+        font-size: 48px;
+    }
+    h3 {
+        margin: 0;
+    }
+    .credit {
+        position: absolute;
+        bottom: 10px;
+        font-size: 0.9em;
     }
     .barcode {
         border-radius: 10px;
@@ -145,6 +167,11 @@
         justify-content: center;
         padding: 20px;
         height: 10%;
+    }
+    .loading {
+        position: absolute;
+        width: 100%;
+        height: 100%;
     }
     @media screen and (min-width: 700px) {
         .barcode {

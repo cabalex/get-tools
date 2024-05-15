@@ -76,11 +76,13 @@
                 <h3>Shared code</h3>
                 <p class="small">{sharedDevice.deviceId} - {sharedDevice.pin}</p>
             </div>
-            <button on:click={copyLink.bind(null, sharedDevice.deviceId, sharedDevice.pin)}>
-                <IconCopy /> Copy
+            <button on:click={() => copyLink.bind(null, sharedDevice.deviceId, sharedDevice.pin)}>
+                <IconCopy />
+                <span>Copy</span>
             </button>
             <button class="dangerBtn" on:click={revokeSharedDevice.bind(null, sharedDevice.deviceId, sharedDevice.pin)}>
-                <IconTrash /> Revoke
+                <IconTrash />
+                <span>Revoke</span>
             </button>
         </div>
         {/each}
@@ -112,6 +114,7 @@
         justify-content: center;
         align-items: center;
         z-index: 100;
+        text-align: center;
     }
     .shareModalInner {
         background-color: white;
@@ -130,6 +133,7 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        text-align: left;
     }
     h2 {
         margin: 10px 0;
@@ -148,11 +152,17 @@
         margin: 10px 0;
         padding: 5px 10px;
         border-radius: 10px;
+        text-align: left;
     }
     .sharedDevice .text {
         width: 100%;
     }
     .sharedDevice .text > * {
         margin: 0;
+    }
+    @media screen and (max-width: 550px) {
+        button span {
+            display: none;
+        }
     }
 </style>

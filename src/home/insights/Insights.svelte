@@ -3,6 +3,7 @@
     import type { Transaction } from "../../types";
     import Charts from "./Charts.svelte";
     import 'chartjs-adapter-date-fns';
+    import { slide } from "svelte/transition";
 
     export let transactions: Transaction[];
 </script>
@@ -17,18 +18,18 @@
         {#if i === 0 || transaction.actualDate.slice(0, 10) !== transactions[i - 1].actualDate.slice(0, 10)}
             <h1>{transaction.actualDate.slice(0, 10)}</h1>
         {/if}
-        <div class="transaction">
+        <div class="transaction" transition:slide={{duration: 100}}>
             {#if transaction.friendlyName.includes("Dining Hall")}
             <IconToolsKitchen2 />
             {:else if transaction.friendlyName.includes("Market")}
             <IconShoppingCart />
-            {:else if transaction.friendlyName.includes("Coffee Bar")}
+            {:else if transaction.friendlyName.includes("Coffee")}
             <IconCoffee />
             {:else}
             <IconBuildingStore />
             {/if}
             <h3>{transaction.friendlyName}</h3>
-            $<p>{transaction.amount}</p>
+            $<p>{transaction.amount.toFixed(2)}</p>
         </div>
     {/each}
 </section>
