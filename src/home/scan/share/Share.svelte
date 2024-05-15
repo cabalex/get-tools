@@ -76,7 +76,7 @@
                 <h3>Shared code</h3>
                 <p class="small">{sharedDevice.deviceId} - {sharedDevice.pin}</p>
             </div>
-            <button on:click={() => copyLink.bind(null, sharedDevice.deviceId, sharedDevice.pin)}>
+            <button on:click={copyLink.bind(null, sharedDevice.deviceId, sharedDevice.pin)}>
                 <IconCopy />
                 <span>Copy</span>
             </button>
