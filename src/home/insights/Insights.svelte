@@ -15,8 +15,8 @@
 <section class="transactions">
     <h2>Transactions</h2>
     {#each transactions as transaction, i}
-        {#if i === 0 || transaction.actualDate.slice(0, 10) !== transactions[i - 1].actualDate.slice(0, 10)}
-            <h1>{transaction.actualDate.slice(0, 10)}</h1>
+        {#if i === 0 || new Date(transaction.actualDate).toLocaleDateString() !== new Date(transactions[i - 1].actualDate).toLocaleDateString()}
+            <h1>{new Date(transaction.actualDate).toLocaleDateString()}</h1>
         {/if}
         <div class="transaction" transition:slide={{duration: 100}}>
             {#if transaction.friendlyName.includes("Dining Hall")}
