@@ -12,7 +12,7 @@
 
     let animationDone = false;
     $: {
-        if ($sessionId !== null) {
+        if ($sessionId !== null && lottiePlayer && !animationDone) {
             document.body.style.overflow = "hidden";
             lottiePlayer.getLottie().play();
             setTimeout(() => {
