@@ -2,6 +2,7 @@
 Tools for interacting with CBORD's GET app, featuring:
 - Detailed spending analytics
 - QR code generation
+- Custom deposit amounts *(saved cards only)*
 - Code sharing
 
 This app is not affiliated with CBORD or GET. It's just a passion project for fun!
