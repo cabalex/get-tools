@@ -2,10 +2,11 @@
     import { IconLoader2 } from "@tabler/icons-svelte";
 
     export let color = "var(--primary)";
+    export let size = "3em";
 </script>
 
 <div class="loading" style="color: {color}">
-    <IconLoader2 size="3em" />
+    <IconLoader2 size={size} />
 </div>
 
 <style>

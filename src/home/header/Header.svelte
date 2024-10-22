@@ -9,7 +9,7 @@
 <header>
     <div class="headerText">
         <h3>WELCOME BACK</h3>
-        <h1>You've got <span style="color: var(--secondary)">${money}</span>.</h1>
+        <h1>You've got <span style="color: var(--secondary)">${money.toFixed(2)}</span>.</h1>
         <div class="accounts">
             {#each accounts.filter(x => x.accountType === 3) as account}
                 <div class="account">

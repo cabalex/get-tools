@@ -1,15 +1,13 @@
 <script lang="ts">
     import { Line } from 'svelte-chartjs'
     import { Chart as ChartJS, TimeScale, Title, Tooltip, Legend, LineElement, LinearScale, PointElement, CategoryScale } from "chart.js"
-    import 'chartjs-adapter-date-fns';
+    import 'chartjs-adapter-moment';
     import chartTrendline from 'chartjs-plugin-trendline';
     import type { Transaction } from "../../../types";
 
     export let transactions: Transaction[];
 
-    let firstDate = transactions.length ? new Date(transactions[transactions.length - 1].actualDate) : new Date();
 
-    let chartView: "all" | "30d" | "7d" | "3d" | "1d" = "all";
 
     ChartJS.register(Title, Tooltip, Legend, LineElement, LinearScale, PointElement, TimeScale, CategoryScale, chartTrendline);
 
@@ -32,7 +30,6 @@
         },
         scales: {
             x: {
-                max: new Date(firstDate?.getTime() + 1000 * 60 * 60 * 24 * 7 * 10),
                 type: 'time',
                 color: 'white',
                 ticks: {
@@ -64,7 +61,8 @@
                 fill: false,
                 borderColor: 'rgb(75, 192, 192)',
                 points: false,
-                tension: 0.1,
+                tension: 1,
+                stepped: 'after',
                 pointRadius: 0,
                 trendlineLinear: {
                     colorMin: "gray",
@@ -76,89 +74,40 @@
             },
             {
                 label: 'Banana Bucks',
-                data: transactions.filter(x => x.accountName === "Banana Bucks").map(transaction => ({ x: new Date(transaction.actualDate), y: transaction.resultingBalance })),
+                data: transactions.filter(x => x.accountName === "Banana Bucks").map(transaction => ({ x: new Date(transaction.actualDate), y: transaction.resultingBalance || 0 })),
                 fill: false,
                 borderColor: 'rgb(253, 199, 0)',
                 points: false,
-                tension: 0.1,
+                stepped: 'after',
                 pointRadius: 0,
+                trendlineLinear: {
+                    colorMin: "gray",
+                    colorMax: "gray",
+                    lineStyle: "dotted",
+                    width: 2,
+                    projection: true
+                }
             },
             {
                 label: 'Flexi Dollars',
-                data: transactions.filter(x => x.accountName === "Flexi Dollars").map(transaction => ({ x: new Date(transaction.actualDate), y: transaction.resultingBalance })),
+                data: transactions.filter(x => x.accountName === "Flexi Dollars").map(transaction => ({ x: new Date(transaction.actualDate), y: transaction.resultingBalance || 0 })),
                 fill: false,
                 borderColor: '#93c02d',
                 points: false,
-                tension: 0.1,
+                stepped: 'after',
                 pointRadius: 0,
+                trendlineLinear: {
+                    colorMin: "gray",
+                    colorMax: "gray",
+                    lineStyle: "dotted",
+                    width: 2,
+                    projection: true
+                }
             }
         ]
     }
-    
-    $: {
-        data.datasets[0].data = transactions.map(transaction => ({ x: new Date(transaction.actualDate), y: transaction.resultingBalance }));
 
-        switch(chartView) {
-            case "30d":
-                data.datasets = data.datasets.map(dataset => {
-                    dataset.data = dataset.data.filter(point => point.x.getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000);
-                    
-                    dataset.data.unshift({
-                        x: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-                        y: dataset.data[0]?.y
-                    })
-                    
-                    return dataset;
-                })
-                break;
-            case "7d":
-                data.datasets = data.datasets.map(dataset => {
-                    dataset.data = dataset.data.filter(point => point.x.getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000);
-                    
-                    dataset.data.unshift({
-                        x: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-                        y: dataset.data[0]?.y
-                    })
-                    
-                    return dataset;
-                })
-                break;
-            case "3d":
-                data.datasets = data.datasets.map(dataset => {
-                    dataset.data = dataset.data.filter(point => point.x.getTime() > Date.now() - 3 * 24 * 60 * 60 * 1000);
-                    
-                    dataset.data.unshift({
-                        x: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-                        y: dataset.data[0]?.y
-                    })
-                    
-                    return dataset;
-                })
-                break;
-            case "1d":
-                data.datasets = data.datasets.map(dataset => {
-                    dataset.data = dataset.data.filter(point => point.x.getTime() > Date.now() - 24 * 60 * 60 * 1000);
-                    
-                    dataset.data.unshift({
-                        x: new Date(Date.now() - 24 * 60 * 60 * 1000),
-                        y: dataset.data[0]?.y
-                    })
-                    
-                    return dataset;
-                })
-                break;
-            default:
-                data.datasets = data.datasets.map(dataset => {
-                    dataset.data.unshift({
-                        x: new Date(),
-                        y: dataset.data[0]?.y,
-                    })
-                    
-                    return dataset;
-                })
-                break;
-        }
-    }
+    data.datasets = data.datasets.filter(x => x.data.length > 0);
 </script>
 
 <div class="chart">

@@ -1,13 +1,18 @@
 <script lang="ts">
-    import { IconExclamationCircle, IconCirclePlus, IconDeviceMobile, IconTrash, IconCopy } from "@tabler/icons-svelte";
+    import { IconSettings, IconExclamationCircle, IconCirclePlus, IconDeviceMobile, IconTrash, IconCopy } from "@tabler/icons-svelte";
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
-    import { addSharedDevice, makeGETRequest, revokeSharedDevice, sharedDevices } from "../../../getStore";
+    import { addSharedDevice, makeGETRequest, revokeOptions, revokeSharedDevice, sharedDevices } from "../../../getStore";
     import Loading from "../../../assets/Loading.svelte";
     import RevokeOptions from "./RevokeOptions.svelte";
+    import BoolInput from "../../../assets/BoolInput.svelte";
 
     const dispatcher = createEventDispatcher();
     let loading = false;
+    let showSettings = false;
+
+    let allowViewBalance = true;
+    let allowRevoking = false;
 
     async function createSharedDevice() {
         loading = true;
@@ -36,14 +41,24 @@
         revokingAll = false;
     }
 
-    function copyLink(deviceId: string, pin: string) {
-        navigator.clipboard.writeText(location.origin + location.pathname + `?share=${encodeURIComponent(btoa(JSON.stringify({ deviceId, pin })))}`);
+    function copyLink(deviceId: string, pin: string, e) {
+        let query = deviceId + pin + (allowViewBalance ? "1" : "0") + (allowRevoking ? "1" : "0");
+        if ($revokeOptions) {
+            query += JSON.stringify($revokeOptions);
+        }
+        navigator.clipboard.writeText(location.origin + location.pathname + `?share=${encodeURIComponent(btoa(query))}`);
+        let buttonElem = e.target.closest("button");
+        buttonElem.style.backgroundColor = "green";
+        setTimeout(() => buttonElem.style.backgroundColor = "", 1000);
     }
 </script>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="shareModal" transition:fade={{duration: 100}} on:click={() => dispatcher("close")}>
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="shareModalInner" on:click={(e) => e.stopPropagation()}>
+        <button class="settingsBtn" on:click={() => showSettings = true}>
+            <IconSettings />
+        </button>
         <h2>Share with your friends</h2>
         <p>Create a temporary code to let your friends pay with your points.</p>
         <div class="warning">
@@ -90,6 +105,19 @@
     </div>
 </div>
 
+{#if showSettings}
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div class="shareModal settings" transition:fade={{duration: 100}} on:click={(e) => {showSettings = false; e.stopPropagation()}}>
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="shareModalInner settings" on:click={(e) => e.stopPropagation()}>
+        <h2 style="margin: 0">Share settings</h2>
+        <p style="margin: 0">Only applies to new codes.</p>
+        <BoolInput bind:value={allowRevoking} label="Let users revoke codes" />
+        <BoolInput bind:value={allowViewBalance} label="Let users view your balance" />
+    </div>
+</div>
+{/if}
+
 <style>
     .shareModal {
         position: fixed;
@@ -112,18 +140,21 @@
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         max-width: 700px;
+        position: relative;
     }
-    .warning {
-        border: 1px solid orange;
-        background-color: rgba(255, 165, 0, 0.1);
-        padding: 10px;
-        border-radius: 10px;
-        font-weight: bold;
-        display: flex;
-        gap: 10px;
-        align-items: center;
+    .shareModalInner.settings {
         text-align: left;
-        margin-bottom: 10px;
+    }
+    .settingsBtn {
+        background-color: transparent;
+        color: #111;
+        padding: 10px;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
+    .settingsBtn:hover {
+        background-color: rgba(0, 0, 0, 0.2)
     }
     h2 {
         margin: 10px 0;
@@ -152,6 +183,9 @@
     }
     .sharedDevice .small {
         font-family: monospace;
+    }
+    button {
+        transition: background-color 0.1s ease-in-out;
     }
     @media screen and (max-width: 550px) {
         button span {

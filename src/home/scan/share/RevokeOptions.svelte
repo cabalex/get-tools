@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { IconClock } from "@tabler/icons-svelte";
+    import { IconClock, IconExclamationCircle } from "@tabler/icons-svelte";
     import { revokeOptions } from "../../../getStore";
     import { slide } from "svelte/transition";
 
@@ -34,8 +34,14 @@
             $<input bind:value={balanceAmount} type="number" min="0" />
         {/if}
     </div>
+    {#if revokeAfter === "balance"}
+    <div class="warning" transition:slide={{duration: 100}}>
+        <IconExclamationCircle />
+        GET Tools can't set limits on how much a user can spend per transaction.
+    </div>
+    {/if}
     {#if revokeAfter !== "off"}
-    <div class="warning" transition:slide={{duration: 100}}>Tracking {revokeAfter}. Keep this page open!</div>
+    <div class="tracking" transition:slide={{duration: 100}}>Tracking {revokeAfter}. Keep this page open!</div>
     {/if}
 </div>
 
@@ -47,6 +53,9 @@
         border: 1px solid #aaa;
         padding: 10px;
         border-radius: 10px;
+    }
+    .warning {
+        max-width: 590px;
     }
     .revokeSettings {
         display: flex;
@@ -65,7 +74,7 @@
     input {
         width: 7ch;
     }
-    .warning {
+    .tracking {
         color: red;
         font-weight: bold;
         animation: breathe 3s infinite;

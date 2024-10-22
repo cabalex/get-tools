@@ -1,6 +1,6 @@
 <script lang="ts">
     import { IconScan, IconChevronUp, IconChevronDown, IconShare, IconArrowsMaximize } from "@tabler/icons-svelte";
-    import { makeGETRequest } from "../../getStore";
+    import { makeGETRequest, loadTransactions, loadAccounts } from "../../getStore";
     import { onDestroy, onMount } from "svelte";
     import Share from "./share/Share.svelte";
     import ScanFullscreen from "./ScanFullscreen.svelte";
@@ -17,6 +17,12 @@
         let { response } = await makeGETRequest("authentication", "retrievePatronBarcodePayload");
         code = response;
         PDF417.draw(response, canvasElem, 3);
+    }
+
+    async function close() {
+        loadAccounts();
+        loadTransactions();
+        scanFullscreenOpen = false;
     }
 
     onMount(() => {
@@ -65,7 +71,7 @@
     <Share on:close={() => shareModalOpen = false} />
 {/if}
 {#if scanFullscreenOpen}
-    <ScanFullscreen code={code} on:close={() => scanFullscreenOpen = false} />
+    <ScanFullscreen code={code} on:close={close} />
 {/if}
 
 <style>

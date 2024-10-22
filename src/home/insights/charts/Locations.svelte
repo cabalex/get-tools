@@ -35,18 +35,35 @@
                 transactionData[name] += transaction.amount;
             }
 
-            let sortedLabels = Object.keys(transactionData).sort((a, b) => transactionData[b] - transactionData[a]);
-            let other = sortedLabels.slice(7).reduce((acc, label) => acc + transactionData[label], 0);
-            data.labels = [...sortedLabels.slice(0, 7)];
-            data.datasets[0] = {
-                data: data.labels.map(x => transactionData[x]),
-                backgroundColor: Object.keys(transactionData).map((_, i) => `hsl(${i * 360 / Object.keys(transactionData).length}, 50%, 50%)`)
+            for (let key of Object.keys(transactionData)) {
+                if (key === "GET" || key.startsWith("Deposit")) {
+                    delete transactionData[key];
+                }
             }
 
+            let sortedLabels = Object.keys(transactionData)
+                .sort((a, b) => transactionData[b] - transactionData[a]);
+            let other = sortedLabels.slice(7).reduce((acc, label) => acc + transactionData[label], 0);
+            
+            const labels = sortedLabels.slice(0, 7);
+            const newData = labels.map(x => transactionData[x]);
+            const newColors = Object.keys(transactionData).map((_, i) => `hsl(${i * 360 / Object.keys(transactionData).length}, 50%, 50%)`);
             if (other) {
-                data.labels.push("Other");
-                data.datasets[0].data.push(other);
-                data.datasets[0].backgroundColor.push("hsl(0, 0%, 50%)");
+                labels.push("Other");
+                newData.push(other);
+                newColors.push("hsl(0, 0%, 50%)");
+            }
+
+            const newDataset = {
+                data: newData,
+                backgroundColor: newColors
+            }
+
+            if (JSON.stringify(data.labels) !== JSON.stringify(labels)) {
+                data.labels = labels;
+            }
+            if (JSON.stringify(data.datasets[0]) !== JSON.stringify(newDataset)) {
+                data.datasets[0] = newDataset;
             }
         }
     }

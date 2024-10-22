@@ -72,7 +72,7 @@
     .onboarding {
         background-color: #eee;
         padding: 20px;
-        border-radius: 10px;
+        border-radius: 0 0 10px 10px;
         color: #222;
 
         display: flex;
@@ -80,7 +80,7 @@
         align-items: center;
         gap: 10px;
         max-width: 500px;
-        margin: 20px auto;
+        margin: auto;
         text-align: center;
     }
     .linkInput {

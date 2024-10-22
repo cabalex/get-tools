@@ -1,8 +1,7 @@
 <script lang="ts">
-    import { IconToolsKitchen2, IconShoppingCart, IconBuildingStore, IconCoffee } from "@tabler/icons-svelte";
+    import { IconToolsKitchen2, IconShoppingCart, IconArrowRight, IconBuildingStore, IconCoffee, IconCreditCardPay, IconCreditCardRefund } from "@tabler/icons-svelte";
     import type { Transaction } from "../../types";
     import Charts from "./Charts.svelte";
-    import 'chartjs-adapter-date-fns';
     import { slide } from "svelte/transition";
 
     export let transactions: Transaction[];
@@ -18,18 +17,30 @@
         {#if i === 0 || new Date(transaction.actualDate).toLocaleDateString() !== new Date(transactions[i - 1].actualDate).toLocaleDateString()}
             <h1>{new Date(transaction.actualDate).toLocaleDateString()}</h1>
         {/if}
-        <div class="transaction" transition:slide={{duration: 100}}>
+        <div class="transaction" class:deposit={transaction.locationName.includes("Deposit")} transition:slide={{duration: 100}}>
             {#if transaction.friendlyName.includes("Dining Hall")}
             <IconToolsKitchen2 />
             {:else if transaction.friendlyName.includes("Market")}
             <IconShoppingCart />
             {:else if transaction.friendlyName.includes("Coffee")}
             <IconCoffee />
+            {:else if transaction.locationName.includes("Deposit")}
+            <IconCreditCardPay />
+            {:else if transaction.locationName === "GET"}
+            <IconCreditCardRefund />
             {:else}
             <IconBuildingStore />
             {/if}
             <h3>{transaction.friendlyName}</h3>
-            $<p>{transaction.amount.toFixed(2)}</p>
+            <div class="amount">
+                <span>$<p>{transaction.amount.toFixed(2)}</p></span>
+                {#if typeof transaction.resultingBalance === "number"}
+                    <span style="color: #ccc">
+                        <IconArrowRight size={16} />
+                        ${transaction.resultingBalance.toFixed(2)}
+                    </span>
+                {/if}
+            </div>
         </div>
     {/each}
 </section>
@@ -57,6 +68,15 @@
         border-radius: 10px;
         margin-top: 10px;
     }
+    .transaction.deposit {
+        background-color: #1a1a1a;
+    }
+    .transaction.deposit p {
+        color: #93c02d;
+    }
+    .transaction.deposit span:before {
+        content: "+";
+    }
     .transaction h3 {
         flex-grow: 1;
         overflow: hidden;
@@ -67,6 +87,17 @@
     .transaction p {
         font-weight: bold;
         font-size: 36px;
+        line-height: 1em;
         margin: 0;
+    }
+    .amount {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+    .amount > span {
+        display: flex;
+        gap: 5px;
+        align-items: center;
     }
 </style>

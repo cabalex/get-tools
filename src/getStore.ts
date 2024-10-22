@@ -3,6 +3,7 @@ import type { Account, Transaction } from "./types";
 
 const ENDPOINT = "https://services.get.cbord.com/GETServices/services/json";
 
+// --- Sessions and shared devices ---
 const sessionId = writable<null|string>(null);
 export const sharedDevices = writable<Array<{deviceId: string, pin: string}>>(
     JSON.parse(localStorage.getItem("shared-devices") || "[]")
@@ -24,6 +25,85 @@ export function removeSharedDevice(deviceId: string, pin: string) {
     sharedDevices.set(devices);
 }
 
+// --- Transactions ---
+export const transactions = writable<null|Transaction[]>(null);
+
+const friendlyNames = {
+    "Simp-Oakes": "Oakes Cafe",
+    "Simp-RCHDH": "Rachel Carson/Oakes Dining Hall",
+    "Simp-PorterMarket": "Porter Market",
+    "Simp-Porter": "Porter/Kresge Dining Hall",
+    "Simp-CollegeNine": "College 9/10 Dining Hall",
+    "Simp-Merrill": "Crown/Merrill Dining Hall",
+    "Simp-MerrillMarket": "Merrill Market",
+    "Simp-Cowell": "Cowell/Stevenson Dining Hall",
+    "Simp-OwlsNest": "Owl's Nest Cafe",
+    "Simp-GlobalVillage": "Global Village Cafe",
+    "Simp-PerkEMS": "Perk Coffee Bar (Earth & Marine Sciences)",
+    "Simp-PerkBaskin": "Perk Coffee Bar (Baskin Engineering)",
+    "Simp-PerkPSB": "Perk Coffee Bar (Physical Sciences Building)",
+    "Simp-Stevenson Coffee Shop": "Stevenson Coffee Shop",
+    "Simp-UnivCenter": "University Center",
+    "Simp-SlugStop": "Slug Stop",
+    "Simp-Perk": "Perk Coffee Bar",
+}
+
+export async function loadTransactions(): Promise<Transaction[]> {
+    let startOfTerm = new Date()
+    startOfTerm.setMonth(startOfTerm.getMonth() - 3)
+    
+    let { response } = await makeGETRequest("commerce", "retrieveTransactionHistoryWithinDateRange", {
+        "paymentSystemType": 0,
+        "queryCriteria": {
+            "maxReturnMostRecent": 1000,
+            "newestDate": null,
+            "oldestDate": startOfTerm.toISOString(),
+            "accountId": null
+        }
+    }).catch(console.error);
+
+    if (!response) return [];
+
+    if (response.transactions) {
+        for (let i = 0; i < response.transactions.length; i++) {
+            if (response.transactions[i].locationId === "9001") { // Server Console
+                transactions.set(response.transactions.slice(0, i));
+                return response.transactions.slice(0, i);
+            }
+            
+            // probably a faster way of doing this
+            response.transactions[i].friendlyName = response.transactions[i].locationName.slice(0, -2);
+            for (let key of Object.keys(friendlyNames)) {
+                if (response.transactions[i].friendlyName.startsWith(key)) {
+                    response.transactions[i].friendlyName = friendlyNames[key as never];
+                    break;
+                }
+            }
+            if (response.transactions[i].friendlyName === response.transactions[i].locationName.slice(0, -2)) {
+                response.transactions[i].friendlyName = response.transactions[i].locationName;
+            }
+        }
+        transactions.set(response.transactions);
+    }
+
+    return response.transactions;
+}
+
+// --- Accounts ---
+export const accounts = writable<null|Account[]>(null);
+
+export async function loadAccounts(): Promise<Account[]> {
+    let { response } = await makeGETRequest("commerce", "retrieveAccounts")
+        .catch(console.error);
+    
+    if (!response) return [];
+
+    accounts.set(response.accounts);
+    return response.accounts;
+}
+
+// --- Methods ---
+
 type GETService = "printing" | "ach" | "user" | "student_advantage" | "configuration" |
     "audit" | "menu" | "session" | "authentication" | "userNotification" | "institution" |
     "content" | "rewards" | "ordering" | "merchant" | "commerce" | "notification";
@@ -39,6 +119,9 @@ export async function makeGETRequest(service: GETService, method: string, params
     let content = { method, params };
     if (includeSessionId) {
         content.params.sessionId = get(sessionId);
+    }
+    if (content.params.sessionId === null && service !== "authentication") {
+        throw new Error("Attempted to make GET request while not logged in.");
     }
     
     let request = await fetch(`${ENDPOINT}/${service}`, {
@@ -116,8 +199,7 @@ async function verifySharedSessions() {
     if (options !== null) {
         switch(options.condition) {
             case "balance": {
-                let { response } = await makeGETRequest("commerce", "retrieveAccounts");
-                let accounts: Account[] = response.accounts;
+                let accounts = await loadAccounts();
                 if (accounts.reduce((acc: number, account: Account) => acc + (account.balance || 0), 0) < options.value) {
                     revokeAllCodes();
                     revokeOptions.set(null);
@@ -141,6 +223,9 @@ async function verifySharedSessions() {
                     revokeAllCodes();
                     revokeOptions.set(null);
                     localStorage.removeItem("revoke-options");
+
+                    // refetch transactions for UI
+                    loadTransactions();
                 }
                 break;
             }
@@ -150,15 +235,11 @@ async function verifySharedSessions() {
 
     let devices = get(sharedDevices) || [];
     for (let device of devices) {
-        let response = await makeGETRequest("authentication", "authenticatePIN", {
-            pin: device.pin,
-            deviceId: device.deviceId,
-            systemCredentials: {
-                password: "NOTUSED",
-                userName: "get_mobile",
-                domain: ""
-            }
-        }, false);
+        let response = await makeGETRequest("user", "updatePIN", {
+            oldPIN: device.pin,
+            newPIN: device.pin,
+            deviceId: device.deviceId
+        });
 
         if (response.exception) {
             removeSharedDevice(device.deviceId, device.pin);
@@ -182,7 +263,22 @@ async function revokeAllCodes() {
     }
 }
 
-verifySharedSessions();
-setInterval(verifySharedSessions, 1000 * 10);
+function update() {
+    if (get(sessionId)) {
+        verifySharedSessions();
+        const oldBalance = get(accounts)?.reduce((acc: number, account: Account) => acc + (account.balance || 0), 0);
+        loadAccounts();
+        const newBalance = get(accounts)?.reduce((acc: number, account: Account) => acc + (account.balance || 0), 0);
+        if (oldBalance !== newBalance) {
+            // if balance changed, update transactions
+            loadTransactions();
+        }
+    }
+}
+
+if (!location.search.includes("share=")) {
+    verifySharedSessions();
+    setInterval(update, 1000 * 30);
+}
 
 export default sessionId;
