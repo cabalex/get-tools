@@ -5,9 +5,10 @@
 
     export let transactions: Transaction[];
 
-    let startingBalance = transactions[transactions.length - 1].resultingBalance;
+    let startingBalance = transactions.length === 0 ? 0 : transactions[transactions.length - 1].resultingBalance;
 
     function spending() {
+        if (transactions.length === 0) return 0;
         let dayAmount = (new Date().getTime() - new Date(transactions[transactions.length - 1].actualDate).getTime()) / (1000 * 60 * 60 * 24);
         let days: {[key: string]: number} = {};
         for (let transaction of transactions) {
@@ -28,6 +29,7 @@
 
     const MEAL_COST = 12.23;
     function mealsLeft() {
+        if (transactions.length === 0) return 0;
         let endDate = new Date(new Date(transactions[transactions.length - 1].actualDate).getTime() + 10.5 * 7 * 24 * 60 * 60 * 1000);
         let timeLeft = (endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
         let moneyLeft = transactions[0].resultingBalance / timeLeft;
