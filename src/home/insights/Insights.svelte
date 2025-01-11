@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { IconToolsKitchen2, IconShoppingCart, IconArrowRight, IconBuildingStore, IconCoffee, IconCreditCardPay, IconCreditCardRefund } from "@tabler/icons-svelte";
+    import { IconToolsKitchen2, IconShoppingCart, IconArrowRight, IconBuildingStore, IconCoffee, IconCreditCard, IconCreditCardPay, IconCreditCardRefund } from "@tabler/icons-svelte";
     import type { Transaction } from "../../types";
     import Charts from "./Charts.svelte";
     import { slide } from "svelte/transition";
@@ -17,7 +17,7 @@
         {#if i === 0 || new Date(transaction.actualDate).toLocaleDateString() !== new Date(transactions[i - 1].actualDate).toLocaleDateString()}
             <h1>{new Date(transaction.actualDate).toLocaleDateString()}</h1>
         {/if}
-        <div class="transaction" class:deposit={transaction.locationName.includes("Deposit")} transition:slide={{duration: 100}}>
+        <div class="transaction" class:deposit={transaction.transactionType === 3} transition:slide={{duration: 100}}>
             {#if transaction.friendlyName.includes("Dining Hall")}
             <IconToolsKitchen2 />
             {:else if transaction.friendlyName.includes("Market")}
@@ -38,6 +38,11 @@
                     <span style="color: #ccc">
                         <IconArrowRight size={16} />
                         ${transaction.resultingBalance.toFixed(2)}
+                    </span>
+                {:else if transaction.accountType === 2}
+                    <span style="color: #ccc;">
+                        <IconCreditCard size={16} />
+                        {transaction.accountName}
                     </span>
                 {/if}
             </div>
@@ -74,7 +79,7 @@
     .transaction.deposit p {
         color: #93c02d;
     }
-    .transaction.deposit span:before {
+    .transaction.deposit span:first-child:before {
         content: "+";
     }
     .transaction h3 {

@@ -62,7 +62,7 @@
                 borderColor: 'rgb(75, 192, 192)',
                 points: false,
                 tension: 1,
-                stepped: 'after',
+                stepped: 'before',
                 pointRadius: 0,
                 trendlineLinear: {
                     colorMin: "gray",
@@ -78,7 +78,7 @@
                 fill: false,
                 borderColor: 'rgb(253, 199, 0)',
                 points: false,
-                stepped: 'after',
+                stepped: 'before',
                 pointRadius: 0,
                 trendlineLinear: {
                     colorMin: "gray",
@@ -94,7 +94,7 @@
                 fill: false,
                 borderColor: '#93c02d',
                 points: false,
-                stepped: 'after',
+                stepped: 'before',
                 pointRadius: 0,
                 trendlineLinear: {
                     colorMin: "gray",
@@ -108,6 +108,10 @@
     }
 
     data.datasets = data.datasets.filter(x => x.data.length > 0);
+    for (let dataset of data.datasets) {
+        dataset.data = dataset.data.sort((a, b) => a.x - b.x);
+        dataset.data.push({ x: new Date(), y: dataset.data[dataset.data.length - 1].y });
+    }
 </script>
 
 <div class="chart">
