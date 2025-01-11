@@ -87,7 +87,7 @@
         <div class="amountInput">
             <div class="amount">
                 <IconCurrencyDollar />
-                <input type="number" placeholder="Amount" bind:value={amount} />
+                <input type="number" placeholder="Amount" step="any" bind:value={amount} />
             </div>
             to
             <select bind:value={selectedAccount}>
