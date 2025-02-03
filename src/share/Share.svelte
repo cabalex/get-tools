@@ -123,9 +123,14 @@
     // https://bright-qrcode.glitch.me/
     async function renderAsWebGPU() {
         if (!("gpu" in navigator) || !("GPUTextureUsage" in window) || !canvasElem) {
+            console.log("WebGPU not supported, ignoring");
             return;
         }
         const adapter = await (navigator.gpu as any).requestAdapter();
+        if (!adapter) {
+            console.log("Could not request adapter, ignoring");
+            return;
+        }
         const device = await adapter.requestDevice();
         const context: any|null = canvasElem.getContext("webgpu");
         const maxBrightness = 3;
@@ -137,8 +142,6 @@
             usage: (window.GPUTextureUsage as any).RENDER_ATTACHMENT,
             toneMapping: { mode: "extended" },
         });
-
-        const source = context.getCurrentTexture();
 
         // render code
         const code = `
@@ -175,7 +178,7 @@
             primitive: { topology: "triangle-strip" },
         });
 
-        const size = [source.width, source.height];
+        const size = [canvasElem.width, canvasElem.height];
         const texture = device.createTexture({
             size,
             format,
@@ -185,7 +188,7 @@
             (window.GPUTextureUsage as any).TEXTURE_BINDING,
         });
 
-        device.queue.copyExternalImageToTexture({ source }, { texture }, size);
+        device.queue.copyExternalImageToTexture({ source: canvasElem }, { texture }, size);
 
         const bindGroup = device.createBindGroup({
             layout: pipeline.getBindGroupLayout(0),
