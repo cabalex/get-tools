@@ -119,22 +119,27 @@
         clearInterval(interval);
     }
 
+    const webGPUSupported = "gpu" in navigator && "GPUTextureUsage" in window;
+
     // Hack: Use WebGPU to increase screen brightness for code scanning
     // https://bright-qrcode.glitch.me/
-    async function renderAsWebGPU() {
-        if (!("gpu" in navigator) || !("GPUTextureUsage" in window) || !canvasElem) {
-            console.log("WebGPU not supported, ignoring");
-            return;
+    async function renderAsWebGPU(fromElem: HTMLCanvasElement) {
+        if (!webGPUSupported || !canvasElem) {
+            console.log("[WebGPU] WebGPU not supported, ignoring");
+            return false;
         }
         const adapter = await (navigator.gpu as any).requestAdapter();
         if (!adapter) {
-            console.log("Could not request adapter, ignoring");
-            return;
+            console.log("[WebGPU] Could not request adapter, ignoring");
+            return false;
         }
         const device = await adapter.requestDevice();
         const context: any|null = canvasElem.getContext("webgpu");
         const maxBrightness = 3;
-        if (!context) return;
+        if (!context) {
+            console.log("[WebGPU] Could not get context, ignoring");
+            return false;
+        }
         const format = "rgba16float"; 
         context.configure({
             device,
@@ -168,7 +173,6 @@
         fn fragmentMain(@location(0) fragUV : vec2f) -> @location(0) vec4f {
         return textureSample(myTexture, mySampler, fragUV) * ${maxBrightness};
         }`;
-
         const module = device.createShaderModule({ code });
 
         const pipeline = device.createRenderPipeline({
@@ -178,7 +182,7 @@
             primitive: { topology: "triangle-strip" },
         });
 
-        const size = [canvasElem.width, canvasElem.height];
+        const size = [fromElem.width, fromElem.height];
         const texture = device.createTexture({
             size,
             format,
@@ -188,7 +192,7 @@
             (window.GPUTextureUsage as any).TEXTURE_BINDING,
         });
 
-        device.queue.copyExternalImageToTexture({ source: canvasElem }, { texture }, size);
+        device.queue.copyExternalImageToTexture({ source: fromElem }, { texture }, size);
 
         const bindGroup = device.createBindGroup({
             layout: pipeline.getBindGroupLayout(0),
@@ -214,6 +218,8 @@
         passEncoder.end();
 
         device.queue.submit([commandEncoder.finish()]);
+
+        return true;
     }
 
     let generated = false;
@@ -221,8 +227,20 @@
         if (await getSessionId() === false) return;
 
         let { response } = await makeGETRequest("authentication", "retrievePatronBarcodePayload", {sessionId}, false);
-        PDF417.draw(response, canvasElem, 3);
-        await renderAsWebGPU();
+        if (webGPUSupported) {
+            const newElem = document.createElement("canvas");
+            newElem.width = canvasElem.width;
+            newElem.height = canvasElem.height;
+            const ctx = canvasElem.getContext("2d");
+            if (!ctx) return;
+            PDF417.draw(response, newElem, 3);
+            const result = await renderAsWebGPU(newElem);
+            if (!result) {
+                PDF417.draw(response, canvasElem, 3);
+            }
+        } else {
+            PDF417.draw(response, canvasElem, 3);
+        }
         generated = true;
     }
 
