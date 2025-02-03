@@ -119,12 +119,107 @@
         clearInterval(interval);
     }
 
+    // Hack: Use WebGPU to increase screen brightness for code scanning
+    // https://bright-qrcode.glitch.me/
+    async function renderAsWebGPU() {
+        if (!("gpu" in navigator) || !("GPUTextureUsage" in window) || !canvasElem) {
+            return;
+        }
+        const adapter = await (navigator.gpu as any).requestAdapter();
+        const device = await adapter.requestDevice();
+        const context: any|null = canvasElem.getContext("webgpu");
+        const maxBrightness = 3;
+        if (!context) return;
+        const format = "rgba16float"; 
+        context.configure({
+            device,
+            format,
+            usage: (window.GPUTextureUsage as any).RENDER_ATTACHMENT,
+            toneMapping: { mode: "extended" },
+        });
+
+        const source = context.getCurrentTexture();
+
+        // render code
+        const code = `
+        struct VertexOutput {
+        @builtin(position) position : vec4f,
+        @location(0) fragUV : vec2f,
+        }
+
+        @vertex
+        fn vertexMain(@builtin(vertex_index) i : u32) -> VertexOutput {
+        const quadPos = array(vec2f(-1, 1), vec2f(-1, -1), vec2f(1, 1), vec2f(1, -1));
+        const quadUV = array(vec2f(0, 0), vec2f(0, 1), vec2f(1, 0), vec2f(1, 1));
+
+        var output: VertexOutput;
+        output.position = vec4f(quadPos[i], 0, 1);
+        output.fragUV = quadUV[i];
+        return output;
+        }
+
+        @group(0) @binding(0) var mySampler: sampler;
+        @group(0) @binding(1) var myTexture: texture_2d<f32>;
+
+        @fragment
+        fn fragmentMain(@location(0) fragUV : vec2f) -> @location(0) vec4f {
+        return textureSample(myTexture, mySampler, fragUV) * ${maxBrightness};
+        }`;
+
+        const module = device.createShaderModule({ code });
+
+        const pipeline = device.createRenderPipeline({
+            layout: "auto",
+            vertex: { module },
+            fragment: { module, targets: [{ format }] },
+            primitive: { topology: "triangle-strip" },
+        });
+
+        const size = [source.width, source.height];
+        const texture = device.createTexture({
+            size,
+            format,
+            usage:
+            (window.GPUTextureUsage as any).COPY_DST |
+            (window.GPUTextureUsage as any).RENDER_ATTACHMENT |
+            (window.GPUTextureUsage as any).TEXTURE_BINDING,
+        });
+
+        device.queue.copyExternalImageToTexture({ source }, { texture }, size);
+
+        const bindGroup = device.createBindGroup({
+            layout: pipeline.getBindGroupLayout(0),
+            entries: [
+            { binding: 0, resource: device.createSampler() },
+            { binding: 1, resource: texture.createView() },
+            ],
+        });
+
+        const colorAttachments = [
+            {
+            view: context.getCurrentTexture().createView(),
+            loadOp: "clear",
+            storeOp: "store",
+            },
+        ];
+
+        const commandEncoder = device.createCommandEncoder();
+        const passEncoder = commandEncoder.beginRenderPass({ colorAttachments });
+        passEncoder.setPipeline(pipeline);
+        passEncoder.setBindGroup(0, bindGroup);
+        passEncoder.draw(4);
+        passEncoder.end();
+
+        device.queue.submit([commandEncoder.finish()]);
+    }
+
     let generated = false;
     async function generateCode() {
         if (await getSessionId() === false) return;
 
         let { response } = await makeGETRequest("authentication", "retrievePatronBarcodePayload", {sessionId}, false);
         PDF417.draw(response, canvasElem, 3);
+        await renderAsWebGPU();
         generated = true;
     }
 
@@ -134,7 +229,9 @@
         let { response } = await makeGETRequest("commerce", "retrieveAccounts", {sessionId}, false);
         if (response === null) return;
         
-        balance = response.accounts.reduce((acc, account) => acc + account.balance, 0);
+        balance = response.accounts
+            .filter((account: any) => account.isAccountTenderActive && account.isActive)
+            .reduce((acc: number, account: any) => acc + account.balance, 0);
         return balance;
     }
 

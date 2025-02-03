@@ -47,7 +47,7 @@
 </script>
 
 <h2>You're spending approx. <span style="color: {color()}">${spending().toFixed(2)}</span> per day.</h2>
-<h3>With this balance, you can eat <span style="color: {mealColor()}">{Math.max(0, mealsLeft()).toFixed(2)}</span> meals per day ({Math.floor(transactions[0].resultingBalance / MEAL_COST)} meals).</h3>
+<h3>With this balance, you can eat <span style="color: {mealColor()}">{Math.max(0, mealsLeft()).toFixed(2)}</span> meals per day ({transactions.length ? Math.floor(transactions[0].resultingBalance / MEAL_COST) : 0} meals).</h3>
 <div class="charts">
     <Balance transactions={transactions} />
     <Locations transactions={transactions} />
