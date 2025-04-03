@@ -256,10 +256,53 @@
         return balance;
     }
 
+    async function generateTrend() {
+        if (invalid || balance === null) return;
+        let { response } = await makeGETRequest(
+            "commerce",
+            "retrieveTransactionHistoryWithinDateRange",
+            {
+                sessionId,
+                paymentSystemType: 0,
+                queryCriteria: {
+                    maxReturnMostRecent: 1000,
+                    newestDate: null,
+                    oldestDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 80).toISOString(),
+                    accountId: null,
+                },
+            },
+            false
+        );
+        if (response === null) return;
+
+        // get first server console
+        let firstTransaction = response.transactions.find((transaction: any) => transaction.locationName === "Server Console");
+        if (!firstTransaction) return 0;
+        let firstTransactionDate = new Date(firstTransaction.postedDate).getTime();
+        let initialBalance = firstTransaction.resultingBalance;
+
+        // end of quarter
+        let timeSinceStart = new Date().getTime() - firstTransactionDate;
+        let quarterLength = 1000 * 60 * 60 * 24 * 75; // 75 days
+
+        let expectedBalance = initialBalance * (1 - (timeSinceStart / quarterLength));
+
+        return expectedBalance - balance;
+    }
+
+    let prevBalance = 0;
+    let trend = 0;
     async function update() {
         await generateCode();
         if (options && (options.viewBalance || (options.revoke && options.revoke.condition === "balance"))) {
             await generateBalance();
+            if (balance !== null && balance !== prevBalance) {
+                let trendResult = await generateTrend();
+                if (trendResult !== undefined) {
+                    trend = trendResult;
+                }
+                prevBalance = balance;
+            }
             if (options.revoke && options.revoke.condition === "balance" && typeof balance === "number" && balance <= options.revoke.value) {
                 revokeCode();
             }
@@ -318,7 +361,12 @@
         </div>
         <footer>
             {#if options && options.viewBalance && balance !== null}
-                <div class="balance" transition:slide={{axis: 'x', duration: 100}}>${balance.toFixed(2)}</div>
+                <div class="balance" transition:slide={{axis: 'x', duration: 100}}>
+                    ${balance.toFixed(2)}
+                    <span class="trend" class:positive={trend >= 0} class:negative={trend < 0}>
+                        {trend > 0 ? "+" : "-"}{Math.abs(trend).toFixed(2)}
+                    </span>
+                </div>
             {/if}
             {#if options && options.allowRevoking}
             <button on:click={() => revokeCode()} class="dangerBtn">I'm done with this code</button>

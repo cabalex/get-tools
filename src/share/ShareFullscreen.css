@@ -197,6 +197,21 @@ body.light {
     font-size: 24px;
     line-height: 0;
 }
+.trend {
+    font-size: 0.9em;
+}
+.trend.positive {
+    color: #00FF00;
+}
+.trend.negative {
+    color: #FF0000;
+}
+.shareClient.light .trend.positive {
+    color: #00AA00;
+}
+.shareClient.light .trend.negative {
+    color: #AA0000;
+}
 .shareClient.light .barcode {
     height: 110px;
     padding: 5px;
