@@ -287,7 +287,7 @@
 
         let expectedBalance = initialBalance * (1 - (timeSinceStart / quarterLength));
 
-        return expectedBalance - balance;
+        return balance - expectedBalance;
     }
 
     let prevBalance = 0;
