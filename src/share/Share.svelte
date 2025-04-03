@@ -291,16 +291,14 @@
     }
 
     let prevBalance = 0;
-    let trend = 0;
+    let trend: number|null = null;
     async function update() {
         await generateCode();
         if (options && (options.viewBalance || (options.revoke && options.revoke.condition === "balance"))) {
             await generateBalance();
             if (balance !== null && balance !== prevBalance) {
                 let trendResult = await generateTrend();
-                if (trendResult !== undefined) {
-                    trend = trendResult;
-                }
+                trend = trendResult ?? null;
                 prevBalance = balance;
             }
             if (options.revoke && options.revoke.condition === "balance" && typeof balance === "number" && balance <= options.revoke.value) {
@@ -363,9 +361,11 @@
             {#if options && options.viewBalance && balance !== null}
                 <div class="balance" transition:slide={{axis: 'x', duration: 100}}>
                     ${balance.toFixed(2)}
-                    <span class="trend" class:positive={trend >= 0} class:negative={trend < 0}>
+                    {#if trend !== null}
+                    <span class="trend" class:positive={trend > 0} class:negative={trend <= 0}>
                         {trend > 0 ? "+" : "-"}{Math.abs(trend).toFixed(2)}
                     </span>
+                    {/if}
                 </div>
             {/if}
             {#if options && options.allowRevoking}
