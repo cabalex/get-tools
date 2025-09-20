@@ -13,9 +13,9 @@ This app is not affiliated with CBORD or GET. It's just a passion project for fu
 
 **You should know that giving account access to any external program comes with risks.** A service like this could easily run off with your points, and if it's hosted outside of a site like `github.io` (where you can directly see the source code), you can't be sure that it won't. _Never, ever_ give services access to sensitive information without knowing what they will do, and how they will handle your data.
 
-GET Tools hooks into CBORD's API to connect with the GET app. This API is exposed with Cross-Origin Resource Sharing (CORS) headers - for non-webdev people, that means your device can access the API through my website _without sending data to an external server._
+GET Tools works entirely on your device by hooking into the GET app's API. This API is exposed with Cross-Origin Resource Sharing (CORS) headers - for non-nerds, that means your phone (computer, smart fridge, etc) can send data directly to GET _without passing through an external server._ Nothing is sent to me, and I can't see any of your data.
 
-GET Tools is compiled into a static site here on GitHub - it's just HTML, JS, and CSS being served on the internet. There's no secret backend server, no databases, no account system, and there never will be. Your API key and everything personal is stored on your device, and you can delete that data at any time by clearing the site's data in your browser.
+The website is completely static here on GitHub - it's just HTML, JS, and CSS being served on the internet. There's no secret backend server, no databases, no account system, and there never will be. Your API key and everything personal is stored on your device, and you can delete that data at any time by clearing the site's data in your browser.
 
 Still hesitant? Good! I encourage you to Inspect Element and check the Network tab to see what's actually being sent back and forth. You can also poke around in [my code](https://github.com/cabalex/get-tools/blob/main/src/getStore.ts) and see what it does. That's the magic of open source!
 

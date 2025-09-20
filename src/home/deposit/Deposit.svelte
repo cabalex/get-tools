@@ -10,7 +10,7 @@
     let depositAccepted = accounts.filter(x => x.depositAccepted);
     let paymentMethods = accounts.filter(x => x.accountType === 2);
 
-    let amount = 12.25;
+    let amount = 14.70;
     let selectedAccount = depositAccepted.length ? depositAccepted[0].id : null;
     let selectedPaymentMethod = paymentMethods.length ? paymentMethods[0].id : null;
 
@@ -176,7 +176,7 @@
             {#if paymentState?.state === "loading"}
                 <Loading color="white" size="1.5em" />
             {:else}
-                Pay ${amount + fee}
+                Pay ${(amount + fee).toFixed(2)}
             {/if}
         </button>
         <div class="notice" style="color: #444">
