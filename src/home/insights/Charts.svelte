@@ -34,6 +34,8 @@
     let timeLeft = (endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
     function mealsLeft() {
         if (transactions.length === 0) return [0, 0];
+        endDate = new Date(new Date(transactions[transactions.length - 1].actualDate).getTime() + 11.5 * 7 * 24 * 60 * 60 * 1000);
+        timeLeft = (endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
         let moneyLeft = transactions[0].resultingBalance / timeLeft;
         return [moneyLeft / MIN_MEAL_COST, moneyLeft / MAX_MEAL_COST];
     }
