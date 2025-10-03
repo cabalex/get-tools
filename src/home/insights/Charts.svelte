@@ -13,9 +13,17 @@
         let dayAmount = (new Date().getTime() - new Date(transactions[transactions.length - 1].actualDate).getTime()) / (1000 * 60 * 60 * 24);
         let days: {[key: string]: number} = {};
         for (let transaction of transactions) {
-            let date = transaction.actualDate.slice(0, 10);
-            if (!days[date]) days[date] = 0;
-            days[date] += transaction.amount;
+            // Prevent deposits from counting as spending
+            if(transaction.friendlyName.startsWith("Deposit") || transaction.friendlyName == "GET") continue;
+
+            // Adjust timezone from UTC (GET API) to local timezone
+            let date = new Date(transaction.actualDate);
+            let minutesOffset = new Date().getTimezoneOffset();
+            date.setMinutes(date.getMinutes() - minutesOffset);
+            let key = date.toISOString().slice(0, 10);
+
+            if (!days[key]) days[key] = 0;
+            days[key] += transaction.amount;
         }
         return Object.values(days).reduce((acc, amount) => acc + amount, 0) / dayAmount;
     }
