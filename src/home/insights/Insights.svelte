@@ -35,12 +35,12 @@
             <div class="amount">
                 <span>$<p>{transaction.amount.toFixed(2)}</p></span>
                 {#if typeof transaction.resultingBalance === "number"}
-                    <span style="color: #ccc">
+                    <span class="dollars">
                         <IconArrowRight size={16} />
                         ${transaction.resultingBalance.toFixed(2)}
                     </span>
                 {:else if transaction.accountType === 2}
-                    <span style="color: #ccc;">
+                    <span class="dollars">
                         <IconCreditCard size={16} />
                         {transaction.accountName}
                     </span>
@@ -73,11 +73,27 @@
         border-radius: 10px;
         margin-top: 10px;
     }
+    @media (prefers-color-scheme: light) {
+        .transaction {
+            background-color: #ccc;
+            color: black;
+        }
+    }
     .transaction.deposit {
         background-color: #1a1a1a;
     }
+    @media (prefers-color-scheme: light) {
+        .transaction.deposit {
+            background-color: #e6e6e9;
+        }
+    }
     .transaction.deposit p {
         color: #93c02d;
+    }
+    @media (prefers-color-scheme: light) {
+        .transaction.deposit p {
+            color: #587d02;
+        }
     }
     .transaction.deposit span:first-child:before {
         content: "+";
@@ -104,5 +120,13 @@
         display: flex;
         gap: 5px;
         align-items: center;
+    }
+    .dollars {
+        color: #ccc;
+    }
+    @media (prefers-color-scheme: light) {
+        .dollars {
+            color: #555;
+        }
     }
 </style>

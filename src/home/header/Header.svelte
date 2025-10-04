@@ -30,10 +30,22 @@
         background-size: cover;
         background-position-y: 40%;
     }
+    @media (prefers-color-scheme: light) {
+        header {
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0), #fff 60%), url(https://cabalex.github.io/get-tools/banner.jpg), var(--primary);
+            background-size: cover;
+            background-position-y: 40%; 
+        }
+    }
     .headerText {
         color: #eee;
         max-width: 1200px;
         margin: 0 auto;
+    }
+    @media (prefers-color-scheme: light) {
+        .headerText {
+            color: #222;
+        }
     }
     .accounts {
         display: flex;
@@ -46,8 +58,19 @@
         border-radius: 10px;
         width: 100px;
     }
+    @media (prefers-color-scheme: light) {
+        .account {
+            background-color: #111;   
+            color: #eee;
+        }
+    }
     .account .small {
         color: #555;
+    }
+    @media (prefers-color-scheme: light) {
+        .account .small {
+            color: #bbb;
+        }
     }
     .account h2 {
         margin: 0;
@@ -64,6 +87,11 @@
     h1 {
         margin-bottom: 20px;
         filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+    }
+    @media (prefers-color-scheme: light) {
+        h1 {
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+        }
     }
     h1 {
         font-weight: normal;

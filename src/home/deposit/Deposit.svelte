@@ -208,8 +208,13 @@
         display: flex;
         gap: 10px;
         align-items: center;
-        color: #ccc;
         font-size: 0.9em;
+        color: #ccc;
+    }
+    @media (prefers-color-scheme: light) {
+        .notice {
+            color: #222;
+        }
     }
     .subtleBtn {
         border-radius: 100px;
@@ -217,8 +222,19 @@
         border-color: #555;
         color: white;
     }
+    @media (prefers-color-scheme: light) {
+        .subtleBtn {
+            color: #222;
+            border-color: #ccc;
+        }
+    }
     .subtleBtn:hover:not(:disabled) {
         border-color: white;
+    }
+    @media (prefers-color-scheme: light) {
+        .subtleBtn:hover:not(:disabled) {
+            border-color: #888;
+        }
     }
     .mobile {
         display: none;
@@ -257,6 +273,11 @@
         width: fit-content;
         gap: 10px;
     }
+    @media (prefers-color-scheme: light) {
+        .amountInput {
+            background-color: #ccc;
+        }
+    }
     .amountInput .amount {
         display: flex;
         align-items: center;
@@ -264,6 +285,11 @@
         background-color: #222;
         border-radius: 100px;
         padding: 0 10px;
+    }
+    @media (prefers-color-scheme: light) {
+        .amountInput .amount {
+            background-color: #eee;
+        }
     }
     .amountInput input {
         background-color: transparent;
@@ -277,6 +303,12 @@
         font-size: unset;
         border-radius: 100px;
         padding: 10px;
+    }
+    @media (prefers-color-scheme: light) {
+        .amountInput select {
+            background-color: #eee;
+            color: black;
+        }
     }
     .depositBtn {
         border-radius: 100px;
