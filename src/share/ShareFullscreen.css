@@ -126,6 +126,7 @@ button.lightMode:hover {
 }
 .shareClient.light {
     background-color: #0066A2;
+    color: white;
     padding: 30px 20px;
     padding-top: 80px;
     border-radius: 15px;
@@ -226,5 +227,14 @@ body.light {
 @media screen and (min-width: 700px) {
     .shareClient .barcode {
         height: 150px;
+    }
+}
+@media screen and (prefers-color-scheme: light) {
+    .shareClient:not(.light) {
+        background-color: #ddd;
+        color: black;
+    }
+    .shareClient:not(.light) .shareHeader {
+        background-color: #fff;
     }
 }

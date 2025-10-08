@@ -45,18 +45,18 @@
         }
     }
     
-    const currentTheme = writable('light'); // Default to light
+    let currentTheme: 'dark' | 'light' = 'light'; // Default to light
 
     onMount(() => {
         // Check for the 'prefers-color-scheme: dark' media query
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
         // Set the initial theme based on the media query
-        currentTheme.set(mediaQuery.matches ? 'dark' : 'light');
+        currentTheme = mediaQuery.matches ? 'dark' : 'light';
 
         // Listen for changes to the media query
         const handleChange = (event: MediaQueryListEvent) => {
-            currentTheme.set(event.matches ? 'dark' : 'light');
+            currentTheme = event.matches ? 'dark' : 'light';
         };
 
         mediaQuery.addEventListener('change', handleChange);
@@ -106,7 +106,7 @@
 {#if $transactions === null}
     <Skeleton height={500} />
 {:else}
-    {#key $currentTheme}
+    {#key currentTheme}
         <Insights transactions={$transactions} />
     {/key}
     <div class="logout">
@@ -126,7 +126,7 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="shareModal" transition:fade={{duration: 100}} on:click={() => addCodeModalOpen = false}>
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div class="shareModalInner" style="width: 500px;" on:click={(e) => e.stopPropagation()}>
+    <div class="shareModalInner" on:click={(e) => e.stopPropagation()}>
             <h2 style="margin-bottom: 0">Save a shared code</h2>
             <p style="margin-top: 0">This won't prevent the code from being revoked. You'll have to delete it manually if it stops working.</p>
             <div style="display: flex; gap: 10px; align-items: center">
@@ -165,7 +165,7 @@
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        max-width: 700px;
+        max-width: min(100%, 700px);
         position: relative;
     }
     .notice {

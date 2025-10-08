@@ -109,12 +109,6 @@
         padding-left: 10px;
         border-radius: 10px;
     }
-    @media (prefers-color-scheme: light) {
-        .linkInput {
-            color: #111;
-            background-color: #ddd;
-        }
-    }
     .linkInput input {
         background-color: #111;
         color: #eee;
@@ -123,6 +117,10 @@
         max-width: calc(100vw - 150px);
     }
     @media (prefers-color-scheme: light) {
+        .linkInput {
+            color: #111;
+            background-color: #ddd;
+        }
         .linkInput input {
             background-color: #fff;
             color: #111;

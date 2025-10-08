@@ -19,8 +19,7 @@
 
   --danger: #e15549;
 
-  /* used for graphs lol */
-
+  /* graph colors */
   --text-color: #ccc;
   --border-color: #333;
   --background-color: #333;
@@ -139,8 +138,5 @@ input:focus-visible {
   }
   a:hover {
     color: #747bff;
-  }
-  button {
-    background-color: #222222;
   }
 }
