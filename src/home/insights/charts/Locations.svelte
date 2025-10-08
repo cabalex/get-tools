@@ -20,7 +20,7 @@
             legend: {
                 position: window.innerWidth < 500 ? "bottom" : "right",
                 labels: {
-                    color: "#eeeeee"
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
                 }
             }
         }

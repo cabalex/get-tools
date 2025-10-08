@@ -8,6 +8,7 @@
     import Scan from "./scan/Scan.svelte";
     import Skeleton from "../assets/Skeleton.svelte";
   import { fade } from "svelte/transition";
+    import { writable } from "svelte/store";
 
     let shareModalOpen = false;
 
@@ -43,6 +44,28 @@
             localStorage.setItem("get-savedCodes", JSON.stringify(savedCodes));
         }
     }
+    
+    let currentTheme: 'dark' | 'light' = 'light'; // Default to light
+
+    onMount(() => {
+        // Check for the 'prefers-color-scheme: dark' media query
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+        // Set the initial theme based on the media query
+        currentTheme = mediaQuery.matches ? 'dark' : 'light';
+
+        // Listen for changes to the media query
+        const handleChange = (event: MediaQueryListEvent) => {
+            currentTheme = event.matches ? 'dark' : 'light';
+        };
+
+        mediaQuery.addEventListener('change', handleChange);
+
+        // Clean up the event listener when the component is unmounted
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+        };
+    });
 </script>
 {#if $sharedDevices && $sharedDevices.length > 0}
     <div class="shareWarning">
@@ -83,7 +106,9 @@
 {#if $transactions === null}
     <Skeleton height={500} />
 {:else}
-    <Insights transactions={$transactions} />
+    {#key currentTheme}
+        <Insights transactions={$transactions} />
+    {/key}
     <div class="logout">
         <button
             class="dangerBtn logoutBtn"
@@ -101,7 +126,7 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="shareModal" transition:fade={{duration: 100}} on:click={() => addCodeModalOpen = false}>
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div class="shareModalInner" style="width: 500px;" on:click={(e) => e.stopPropagation()}>
+    <div class="shareModalInner" on:click={(e) => e.stopPropagation()}>
             <h2 style="margin-bottom: 0">Save a shared code</h2>
             <p style="margin-top: 0">This won't prevent the code from being revoked. You'll have to delete it manually if it stops working.</p>
             <div style="display: flex; gap: 10px; align-items: center">
@@ -140,7 +165,7 @@
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        max-width: 700px;
+        max-width: min(100%, 700px);
         position: relative;
     }
     .notice {
@@ -170,9 +195,19 @@
         align-items: center;
         transition: all 0.2s;
     }
+    @media (prefers-color-scheme: light) {
+        .code {
+            color: black;
+        }
+    }
     .code:hover {
         background-color: #444;
         border-color: #eee;
+    }
+    @media (prefers-color-scheme: light) {
+        .code:hover {
+            color: white;
+        }
     }
     .code .dangerBtn {
         border-radius: 0 5px 0 0;
@@ -249,6 +284,11 @@
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+    @media (prefers-color-scheme: light) {
+        .logout {
+            background-color: #ccc;
+        }
     }
     .logoutBtn {
         padding: 10px 40px;

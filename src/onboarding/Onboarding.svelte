@@ -116,6 +116,16 @@
         width: 32ch;
         max-width: calc(100vw - 150px);
     }
+    @media (prefers-color-scheme: light) {
+        .linkInput {
+            color: #111;
+            background-color: #ddd;
+        }
+        .linkInput input {
+            background-color: #fff;
+            color: #111;
+        }   
+    }
     .small {
         color: #555;
     }

@@ -12,9 +12,9 @@
     ChartJS.register(Title, Tooltip, Legend, LineElement, LinearScale, PointElement, TimeScale, CategoryScale, chartTrendline);
 
     let options = {
-        color: "white",
-        backgroundColor: "#111",
-        borderColor: "white",
+        color: getComputedStyle(document.documentElement).getPropertyValue('--text-color'),
+        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--background-color'),
+        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--text-color'),
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -31,22 +31,22 @@
         scales: {
             x: {
                 type: 'time',
-                color: 'white',
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-color'),
                 ticks: {
-                    color: '#ccc'
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
                 },
                 grid: {
-                    color: '#555'
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--grid-color')
                 }
             },
             y: {
                 min: 0,
-                color: 'white',
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-color'),
                 ticks: {
-                    color: '#ccc'
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
                 },
                 grid: {
-                    color: '#555'
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--grid-color')
                 }
             }
         },
@@ -132,7 +132,7 @@
                     ctx.moveTo(x, yAxis.top);
                     ctx.lineTo(x, yAxis.bottom);
                     ctx.lineWidth = 2;
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-color');
                     ctx.stroke();
                     ctx.restore(); 
                     }
@@ -141,4 +141,4 @@
             chartTrendline
         ]}
     />
-</div>
+</div>   

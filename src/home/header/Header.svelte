@@ -42,12 +42,30 @@
     .account {
         background-color: #eee;
         color: #111;
+        border: 1px solid #ccc;
         padding: 10px;
         border-radius: 10px;
         width: 100px;
     }
     .account .small {
         color: #555;
+    }
+    @media (prefers-color-scheme: light) {
+        header {
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 20%, #fff 70%), url(https://cabalex.github.io/get-tools/banner.jpg), var(--primary);
+            background-size: cover;
+            background-position-y: 40%; 
+        }
+        .headerText {
+            color: #222;
+        }
+        .account {
+            background-color: #e6e6e9;
+            color: #000;
+        }
+        .account .small {
+            color: #777;
+        }
     }
     .account h2 {
         margin: 0;
@@ -64,6 +82,11 @@
     h1 {
         margin-bottom: 20px;
         filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+    }
+    @media (prefers-color-scheme: light) {
+        h1 {
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+        }
     }
     h1 {
         font-weight: normal;

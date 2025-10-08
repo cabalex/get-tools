@@ -18,6 +18,20 @@
   --secondary: #ff6f61;
 
   --danger: #e15549;
+
+  /* graph colors */
+  --text-color: #ccc;
+  --border-color: #333;
+  --background-color: #333;
+  --grid-color: #444;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+     --text-color: #111;
+    --border-color: #888;
+    --background-color: #fff;
+    --grid-color: #bbb;
+  }
 }
 svg {
   flex-shrink: 0;
@@ -94,6 +108,12 @@ input {
   border: 2px solid #222;
   transition: border-color 0.25s;
 }
+@media (prefers-color-scheme: light) {
+  input {
+    background-color: #eee;
+    border: 2px solid #bbb;
+  }
+}
 input:focus-visible {
   outline: none;
   border-color: var(--primary);
@@ -118,8 +138,5 @@ input:focus-visible {
   }
   a:hover {
     color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
   }
 }
