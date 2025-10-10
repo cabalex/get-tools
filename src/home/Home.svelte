@@ -103,11 +103,11 @@
         </button>
     </div>
 </div>
-{#if $transactions === null}
+{#if $transactions === null || $accounts === null}
     <Skeleton height={500} />
 {:else}
     {#key currentTheme}
-        <Insights transactions={$transactions} />
+        <Insights accounts={$accounts} transactions={$transactions} />
     {/key}
     <div class="logout">
         <button

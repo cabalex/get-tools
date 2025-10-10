@@ -3,8 +3,12 @@
     import type { Transaction } from '../../types';
     import Balance from './charts/Balance.svelte';
     import Locations from './charts/Locations.svelte';
+    import type { Account } from "../../types";
 
     export let transactions: Transaction[];
+    export let accounts: Account[];
+
+    $: money = accounts.reduce((acc, account) => acc + (account.balance || 0), 0);
 
     let startingBalance = transactions.length === 0 ? 0 : transactions[transactions.length - 1].resultingBalance;
 
@@ -44,7 +48,7 @@
         if (transactions.length === 0) return [0, 0];
         endDate = new Date(new Date(transactions[transactions.length - 1].actualDate).getTime() + 11.5 * 7 * 24 * 60 * 60 * 1000);
         timeLeft = (endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
-        let moneyLeft = transactions[0].resultingBalance / timeLeft;
+        let moneyLeft = money / timeLeft;
         return [moneyLeft / MIN_MEAL_COST, moneyLeft / MAX_MEAL_COST];
     }
 
@@ -55,9 +59,9 @@
     }
 
     function printMealsLeft() {
-        if (transactions.length > 0) {
-            let min = Math.floor(transactions[0].resultingBalance / MIN_MEAL_COST);
-            let max = Math.floor(transactions[0].resultingBalance / MAX_MEAL_COST);
+       if (transactions.length > 0) {
+            let min = Math.floor(money / MIN_MEAL_COST);
+            let max = Math.floor(money / MAX_MEAL_COST);
             if (min === max) return min;
             return Math.round(min + max / 2);
         }
@@ -101,7 +105,7 @@
             {#if transactions.length > 0}
             <div class="fact">
                 <b>Meals left</b>
-                <span>{Math.floor(transactions[0].resultingBalance / MAX_MEAL_COST)} - {Math.floor(transactions[0].resultingBalance / MIN_MEAL_COST)}</span>
+                <span>{Math.floor(money / MAX_MEAL_COST)} - {Math.floor(money / MIN_MEAL_COST)}</span>
             </div>
             {/if}
             <div class="fact">
