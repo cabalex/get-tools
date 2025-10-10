@@ -3,13 +3,15 @@
     import type { Transaction } from "../../types";
     import Charts from "./Charts.svelte";
     import { slide } from "svelte/transition";
+    import type { Account } from "../../types";
 
     export let transactions: Transaction[];
+    export let accounts: Account[];
 </script>
 
 <section class="insights">
     <h1>SPENDING INSIGHTS</h1>
-    <Charts transactions={transactions} />
+    <Charts accounts={accounts} transactions={transactions} />
 </section>
 <section class="transactions">
     <h2>Transactions</h2>
