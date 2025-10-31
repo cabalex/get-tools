@@ -69,7 +69,7 @@
                     colorMax: "gray",
                     lineStyle: "dotted",
                     width: 2,
-                    projection: true
+                    projection: false
                 }
             },
             {
@@ -85,7 +85,7 @@
                     colorMax: "gray",
                     lineStyle: "dotted",
                     width: 2,
-                    projection: true
+                    projection: false
                 }
             },
             {
@@ -101,7 +101,7 @@
                     colorMax: "gray",
                     lineStyle: "dotted",
                     width: 2,
-                    projection: true
+                    projection: false
                 }
             }
         ]
