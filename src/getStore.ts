@@ -62,7 +62,7 @@ export async function loadTransactions(): Promise<Transaction[]> {
     {
       paymentSystemType: 0,
       queryCriteria: {
-        maxReturnMostRecent: 20,
+        maxReturnMostRecent: 1000,
         newestDate: null,
         oldestDate: startOfTerm.toISOString(),
         accountId: null,
