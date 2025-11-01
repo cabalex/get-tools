@@ -63,7 +63,7 @@
             let min = Math.floor(money / MIN_MEAL_COST);
             let max = Math.floor(money / MAX_MEAL_COST);
             if (min === max) return min;
-            return Math.round(min + max / 2);
+            return Math.round((min + max) / 2);
         }
         return 0;
     }
