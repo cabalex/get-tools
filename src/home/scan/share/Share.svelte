@@ -51,6 +51,21 @@
         buttonElem.style.backgroundColor = "green";
         setTimeout(() => buttonElem.style.backgroundColor = "", 1000);
     }
+
+    function addByLink() {
+        let code = prompt("Enter the share link or code:");
+        if (code) {
+            code = code.includes("?share=") ? code.split("?share=")[1] : code;
+            try {
+                let decoded = atob(decodeURIComponent(code));
+                let deviceId = decoded.slice(0, 16);
+                let pin = decoded.slice(16, 20);
+                addSharedDevice(deviceId, pin);
+            } catch (e) {
+                alert("Invalid share link or code.");
+            }
+        }
+    }
 </script>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="shareModal" transition:fade={{duration: 100}} on:click={() => dispatcher("close")}>
@@ -95,6 +110,12 @@
             <Loading color="black" />
         </div>
         {/if}
+        <div class="centeredBtnrow">
+            Don't see your device?
+            <button class="smallBtn" on:click={addByLink}>
+                Add by link
+            </button>
+        </div>
         <div class="centeredBtnrow">
             <button on:click={createSharedDevice}>
                 <IconCirclePlus />
@@ -161,9 +182,16 @@
     }
     .centeredBtnrow {
         margin: 10px 0;
+        gap: 10px;
         width: 100%;
         display: flex;
         justify-content: center;
+        align-items: center;
+    }
+    .smallBtn {
+        background-color: transparent;
+        color: var(--primary);
+        padding: 0;
     }
     .sharedDevice {
         display: flex;
