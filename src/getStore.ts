@@ -40,6 +40,7 @@ const friendlyNames = {
   "Simp-CollegeNine": "College 9/10 Dining Hall",
   "Simp-Merrill": "Crown/Merrill Dining Hall",
   "Simp-MerrillMarket": "Merrill Market",
+  "Simp-MerrilM": "Merrill Market",
   "Simp-Cowell": "Cowell/Stevenson Dining Hall",
   "Simp-OwlsNest": "Owl's Nest Cafe",
   "Simp-GlobalVillage": "Global Village Cafe",
@@ -50,8 +51,6 @@ const friendlyNames = {
   "Simp-UnivCenter": "University Center",
   "Simp-SlugStop": "Slug Stop",
   "Simp-Perk": "Perk Coffee Bar",
-  "Simp-MerrilM01": "Merrill Market",
-  "Simp-MerrilM02": "Merrill Market",
 };
 
 export async function loadTransactions(): Promise<Transaction[]> {
