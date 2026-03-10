@@ -50,6 +50,8 @@ const friendlyNames = {
   "Simp-UnivCenter": "University Center",
   "Simp-SlugStop": "Slug Stop",
   "Simp-Perk": "Perk Coffee Bar",
+  "Simp-MerrilM01": "Merrill Market",
+  "Simp-MerrilM02": "Merrill Market",
 };
 
 export async function loadTransactions(): Promise<Transaction[]> {
