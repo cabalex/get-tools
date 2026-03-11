@@ -41,6 +41,7 @@ const friendlyNames = {
   "Simp-Merrill": "Crown/Merrill Dining Hall",
   "Simp-MerrillMarket": "Merrill Market",
   "Simp-MerrilM": "Merrill Market",
+  "Simp-BananaJoes": "Banana Joe's",
   "Simp-Cowell": "Cowell/Stevenson Dining Hall",
   "Simp-OwlsNest": "Owl's Nest Cafe",
   "Simp-GlobalVillage": "Global Village Cafe",
