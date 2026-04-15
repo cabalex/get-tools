@@ -54,6 +54,36 @@ const friendlyNames = {
   "Simp-Perk": "Perk Coffee Bar",
 };
 
+export function getFirstTransaction(transactions: Transaction[], plan = "Slug Points") {
+  let balance = null;
+  for (let i = 0; i < transactions.length; i++) {
+    if (transactions[i].locationName.includes(" Dining Systems Mgr")) {
+        // Server Console -> now only called UI UDS (12) Dining Systems Mgr
+        // which takes all excess funds at the end of each quarter
+        // Use it if applicable, but some people don't even have this
+        // transaction, so don't rely on it exclusively
+        let j = i + 1;
+        while (j < transactions.length) {
+          if (transactions[i].accountName === transactions[j].accountName) {
+            transactions[i].resultingBalance = transactions[j].resultingBalance + transactions[j].amount;
+            break;
+          }
+          j++;
+        }
+        
+        return i;
+    }
+    if (transactions[i].accountName === plan) {
+      if (balance !== null && transactions[i].resultingBalance < balance && transactions[i].transactionType === 1) {
+        // we found our first transaction, as it's a payment that increased our balance after it had already been decreased (indicating the start of a new quarter)
+        return i;
+      }
+      balance = transactions[i].resultingBalance;
+    }
+  }
+  return transactions.length;
+}
+
 export async function loadTransactions(): Promise<Transaction[]> {
   let startOfTerm = new Date();
   startOfTerm.setMonth(startOfTerm.getMonth() - 6);
@@ -75,32 +105,28 @@ export async function loadTransactions(): Promise<Transaction[]> {
   if (!response) return [];
 
   if (response.transactions) {
-    for (let i = 0; i < response.transactions.length; i++) {
-      if (response.transactions[i].locationId === "9001") {
-        // Server Console
-        transactions.set(response.transactions.slice(0, i));
-        return response.transactions.slice(0, i);
-      }
-
+    const firstTransactionIndex = getFirstTransaction(response.transactions);
+    const fetchedTransactions = response.transactions.slice(0, firstTransactionIndex);
+    for (let i = 0; i < fetchedTransactions.length; i++) {
       // probably a faster way of doing this
-      response.transactions[i].friendlyName = response.transactions[
+      fetchedTransactions[i].friendlyName = response.transactions[
         i
       ].locationName.slice(0, -2);
       for (let key of Object.keys(friendlyNames)) {
-        if (response.transactions[i].friendlyName.startsWith(key)) {
-          response.transactions[i].friendlyName = friendlyNames[key as never];
+        if (fetchedTransactions[i].friendlyName.startsWith(key)) {
+          fetchedTransactions[i].friendlyName = friendlyNames[key as never];
           break;
         }
       }
       if (
-        response.transactions[i].friendlyName ===
-        response.transactions[i].locationName.slice(0, -2)
+        fetchedTransactions[i].friendlyName ===
+        fetchedTransactions[i].locationName.slice(0, -2)
       ) {
-        response.transactions[i].friendlyName =
-          response.transactions[i].locationName;
+        fetchedTransactions[i].friendlyName =
+          fetchedTransactions[i].locationName;
       }
     }
-    transactions.set(response.transactions);
+    transactions.set(fetchedTransactions);
   }
 
   return response.transactions;

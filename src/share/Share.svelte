@@ -1,6 +1,6 @@
 <script lang="ts">
     import { IconBarcode, IconBarcodeOff, IconUser, IconChevronLeft } from "@tabler/icons-svelte";
-    import { makeGETRequest } from "../getStore";
+    import { makeGETRequest, getFirstTransaction } from "../getStore";
     import { slide } from "svelte/transition";
     import { onDestroy, onMount } from "svelte";
     import * as PDF417 from "pdf417-generator";
@@ -276,10 +276,14 @@
         if (response === null) return;
 
         // get first server console
-        let firstTransaction = response.transactions.find((transaction: any) => transaction.locationName === "Server Console");
-        if (!firstTransaction) return 0;
+        if (response.transactions.length === 0) return 0;
+        let firstTransactionIndex = getFirstTransaction(response.transactions);
+        if (firstTransactionIndex > 0) {
+            firstTransactionIndex = firstTransactionIndex - 1;
+        }
+        const firstTransaction = response.transactions[firstTransactionIndex];
         let firstTransactionDate = new Date(firstTransaction.postedDate).getTime();
-        let initialBalance = firstTransaction.resultingBalance;
+        let initialBalance = firstTransaction.resultingBalance + firstTransaction.amount;
 
         // end of quarter
         let timeSinceStart = new Date().getTime() - firstTransactionDate;

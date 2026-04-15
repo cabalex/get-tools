@@ -40,20 +40,43 @@
         return "lime";
     }
 
+    function getEndDate(transactions: Transaction[] = []) {
+        const stored = localStorage.getItem("get-endDate");
+        if (stored) {
+            const date = new Date(stored);
+            if (isNaN(date.getTime()) || date.getTime() < new Date().getTime()) {
+                localStorage.removeItem("get-endDate");
+            } else if (!isNaN(date.getTime())) {
+                return date;
+            }
+        }
+
+        if (transactions.length === 0) return new Date(new Date().getTime() + 11.5 * 7 * 24 * 60 * 60 * 1000);
+        return new Date(new Date(transactions[transactions.length - 1].actualDate).getTime() + 11.5 * 7 * 24 * 60 * 60 * 1000);
+    }
+
+    function changeDate(e: any) {
+        let date = new Date(e.target.value);
+        console.log(e.target.value);
+        if (!isNaN(date.getTime())) {
+            localStorage.setItem("get-endDate", date.toISOString());
+        }
+        endDate = getEndDate(transactions);
+    }
+
     const MIN_MEAL_COST = 12.60;
     const MAX_MEAL_COST = 14.70;
-    let endDate = new Date(new Date().getTime() + 11.5 * 7 * 24 * 60 * 60 * 1000);
-    let timeLeft = (endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
-    function mealsLeft() {
+    $: endDate = getEndDate(transactions);
+    $: timeLeft = (endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
+    function mealsLeft(endDate: Date) {
         if (transactions.length === 0) return [0, 0];
-        endDate = new Date(new Date(transactions[transactions.length - 1].actualDate).getTime() + 11.5 * 7 * 24 * 60 * 60 * 1000);
         timeLeft = (endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
         let moneyLeft = money / timeLeft;
         return [moneyLeft / MIN_MEAL_COST, moneyLeft / MAX_MEAL_COST];
     }
 
-    function printMPD() {
-        let meals = mealsLeft();
+    function printMPD(endDate: Date) {
+        let meals = mealsLeft(endDate);
         if (meals[0].toFixed(2) === meals[1].toFixed(2)) return Math.max(0, meals[0]).toFixed(2);
         return `~${((Math.max(0, meals[1]) + Math.max(0, meals[0])) / 2).toFixed(2)}`;
     }
@@ -68,8 +91,8 @@
         return 0;
     }
     
-    function mealColor() {
-        let meals = mealsLeft()[1];
+    function mealColor(endDate: Date) {
+        let meals = mealsLeft(endDate)[1];
         if (meals < 1) return "red";
         if (meals < 2) return "orange";
         return "lime";
@@ -80,7 +103,7 @@
 </script>
 
 <h2>You're spending approx. <span style="color: {color()}">${spending().toFixed(2)}</span> per day.</h2>
-<h3>With this balance, you can eat <span style="color: {mealColor()}">{printMPD()}</span> meals per day (~{printMealsLeft()} meals). </h3>
+<h3>With this balance, you can eat <span style="color: {mealColor(endDate)}">{printMPD(endDate)}</span> meals per day (~{printMealsLeft()} meals). </h3>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-missing-attribute -->
 <a on:click={() => advancedModalOpen = true}>Why is this approximate?</a>
@@ -96,7 +119,7 @@
         <div class="modalInner" on:click={(e) => e.stopPropagation()}>
             <h2>About spending analytics</h2>
             <p style="margin-top: 0">As of 2025, meal prices vary based on time of meal (Breakfast, Lunch, Dinner, Late Night). When you eat determines how many "swipes" you can do.</p>
-            <p>All analytics assume an end date of <b>{endDate.toLocaleDateString()}</b>. This date is auto-detected by when points are added to your account, and may be inaccurate.</p>
+            <p>All analytics assume an end date of <input type="date" value={endDate.toISOString().split("T")[0]} on:change={changeDate} />. This date is auto-detected by when points are added to your account, and may be inaccurate.</p>
             <p>Meal prices may become out of date; check <a href="https://dining.ucsc.edu/plans-pricing/entry/" rel="noopener noreferrer" target="_blank">the dining website</a> for the most accurate information.</p>
             <div class="fact">
                 <b>Meal price</b>
@@ -110,7 +133,7 @@
             {/if}
             <div class="fact">
                 <b>Meals per day</b>
-                <span>{mealsLeft().reverse().map(x => x.toFixed(2)).join(" - ")}</span>
+                <span>{mealsLeft(endDate).reverse().map(x => x.toFixed(2)).join(" - ")}</span>
             </div>
         </div>
     </div>
@@ -159,6 +182,12 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         max-width: 400px;
         position: relative;
+    }
+    input[type="date"] {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 5px;
+        width: 120px;
     }
     .fact {
         display: flex;
