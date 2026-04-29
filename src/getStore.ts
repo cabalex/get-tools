@@ -256,7 +256,7 @@ export async function logout() {
     });
   }
 
-  if (response.response === true) {
+  if (response === null || response.response === true) {
     localStorage.removeItem("get-data");
     localStorage.removeItem("shared-devices");
     window.location.reload();
@@ -330,6 +330,9 @@ async function verifySharedSessions() {
     });
 
     if (response.exception) {
+      if (response.exception.startsWith("4001|")) {
+        globalError.set(response.exception);
+      }
       removeSharedDevice(device.deviceId, device.pin);
     }
   }
