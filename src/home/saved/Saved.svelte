@@ -32,6 +32,7 @@
     }
 </script>
 
+{#if !headless || savedCodes.length > 0}
 <div class="savedCodes">
     {#if !headless}
     <h2>Saved codes</h2>
@@ -51,6 +52,7 @@
         </button>
     </div>
 </div>
+{/if}
 
 {#if addCodeModalOpen}
 <!-- svelte-ignore a11y-no-static-element-interactions -->
