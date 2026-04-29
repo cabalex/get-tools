@@ -5,6 +5,7 @@ const ENDPOINT = "https://services.get.cbord.com/GETServices/services/json";
 
 // --- Sessions and shared devices ---
 const sessionId = writable<null | string>(null);
+export const globalError = writable<null | string>(null);
 export const sharedDevices = writable<Array<{ deviceId: string; pin: string }>>(
   JSON.parse(localStorage.getItem("shared-devices") || "[]")
 );
@@ -200,8 +201,8 @@ export async function makeGETRequest(
   return request.json();
 }
 
-async function getToken() {
-  if (!localStorage.getItem("get-data")) return;
+export async function getToken() {
+  if (!localStorage.getItem("get-data") || location.search.includes("share")) return;
 
   let { pin, deviceId } = JSON.parse(localStorage.getItem("get-data") || "{}");
 
@@ -228,6 +229,7 @@ async function getToken() {
 
   if (response.exception) {
     console.error(response.exception);
+    globalError.set(response.exception);
     //localStorage.removeItem("get-data");
     return;
   }
@@ -246,9 +248,13 @@ export async function logout() {
     return;
   }
 
-  let response = await makeGETRequest("user", "deletePIN", {
-    deviceId,
-  });
+  let response = null;
+  // Allow clearing of localStorage on already logged out devices
+  if (get(sessionId)) {
+    response = await makeGETRequest("user", "deletePIN", {
+      deviceId,
+    });
+  }
 
   if (response.response === true) {
     localStorage.removeItem("get-data");

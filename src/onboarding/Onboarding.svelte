@@ -9,7 +9,7 @@
     async function validateGET(sessionId: string) {
         loading = true;
 
-        let deviceId = Math.round(Math.random() * 100_000_000_000_000_000).toString(16).padStart(16, "9");
+        let deviceId = crypto.randomUUID();
         let pin = Math.floor(Math.random() * 9999).toString().padStart(4, "0");
 
 

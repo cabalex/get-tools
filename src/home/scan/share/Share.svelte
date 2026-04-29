@@ -2,7 +2,7 @@
     import { IconSettings, IconExclamationCircle, IconCirclePlus, IconDeviceMobile, IconTrash, IconCopy } from "@tabler/icons-svelte";
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
-    import { addSharedDevice, makeGETRequest, revokeOptions, revokeSharedDevice, sharedDevices } from "../../../getStore";
+    import { addSharedDevice, globalError, getToken, makeGETRequest, revokeOptions, revokeSharedDevice, sharedDevices } from "../../../getStore";
     import Loading from "../../../assets/Loading.svelte";
     import RevokeOptions from "./RevokeOptions.svelte";
     import BoolInput from "../../../assets/BoolInput.svelte";
@@ -14,10 +14,10 @@
     let allowViewBalance = true;
     let allowRevoking = false;
 
-    async function createSharedDevice() {
+    async function createSharedDevice(retried=false) {
         loading = true;
 
-        let deviceId = Math.round(Math.random() * 100_000_000_000_000_000).toString(16).padStart(16, "9");
+        let deviceId = crypto.randomUUID();
         let pin = Math.floor(Math.random() * 9999).toString().padStart(4, "0");
 
 
@@ -28,6 +28,14 @@
 
         if (response.response === true) {
             addSharedDevice(deviceId, pin);
+        } else if (response.exception) {
+            // need to reget session id
+            if (!retried) {
+                await getToken();
+                createSharedDevice(true);
+            } else {
+                alert(`Failed to create shared code (${response.exception}).\nReloading the page may fix this problem.`);
+            }
         }
         loading = false;
     }
@@ -80,6 +88,10 @@
             <IconExclamationCircle /> 
             <span>Creating temporary codes allows other people access to your GET account.<br /> Only share this link with people you trust!</span>
         </div>
+        <div class="warning">
+            <IconExclamationCircle /> 
+            <span>Recent updates to GET have made it so only one session can be activated at a time. Creating a shared device <b>will</b> log you out of this session.</span>
+        </div>
         {#if $sharedDevices && $sharedDevices.length > 0}
             <RevokeOptions />
             <div style="margin: 10px 0; display: flex; justify-content: flex-end">
@@ -87,6 +99,12 @@
                     {revokingAll ? "Revoking..." : "Revoke all codes"}
                 </button>
             </div>
+        {/if}
+        {#if $globalError}
+        <div class="warning">
+            <IconExclamationCircle /> 
+            <span>{$globalError}</span>
+        </div>
         {/if}
         {#each $sharedDevices as sharedDevice}
         <div class="sharedDevice">
@@ -117,7 +135,7 @@
             </button>
         </div>
         <div class="centeredBtnrow">
-            <button on:click={createSharedDevice}>
+            <button disabled={$sharedDevices && $sharedDevices.length > 0} on:click={() => createSharedDevice()}>
                 <IconCirclePlus />
                 Generate Code
             </button>

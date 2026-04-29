@@ -51,12 +51,13 @@
         let params = new URLSearchParams(location.search);
         try {
             let shareCode = atob(params.get("share") || "");
-            deviceId = shareCode.slice(0, 16);
-            pin = shareCode.slice(16, 20);
+            const deviceIdLen = shareCode.split("{")[0].includes("-") ? 36 : 16;
+            deviceId = shareCode.slice(0, deviceIdLen);
+            pin = shareCode.slice(deviceIdLen, deviceIdLen + 4);
             options = {
-                viewBalance: shareCode[20] === "1",
-                allowRevoking: shareCode[21] === "1",
-                revoke: JSON.parse(shareCode.slice(22) || "null")
+                viewBalance: shareCode[deviceIdLen + 4] === "1",
+                allowRevoking: shareCode[deviceIdLen + 5] === "1",
+                revoke: JSON.parse(shareCode.slice(deviceIdLen + 6) || "null")
             };
         } catch {
             try {
@@ -68,8 +69,8 @@
                     viewBalance: false,
                     revoke: shareParams.revokeOptions || null
                 };
-            } catch {
-                console.error("Invalid share code.");
+            } catch (e) {
+                console.error("Invalid share code.", e);
                 invalid = true;
                 clearInterval(interval);
                 return false;
